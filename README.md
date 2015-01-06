@@ -1,4 +1,3 @@
-ownnote
-=======
+# Own Note
+Place this app in **owncloud/apps/**
 
-Notes app for ownCloud

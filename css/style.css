@@ -1,0 +1,282 @@
+
+.listing {
+	height: 40pt;
+	font-style: normal;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 0pt;
+	font-size: 100%;
+	font-family: inherit;
+	line-height: 40pt;
+	white-space: nowrap;
+	padding: 0pt 15pt;
+	border-bottom: 1pt solid #EEE;
+	width: 100%;
+}
+
+.listingSort {
+	height: 40pt;
+	font-style: normal;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 0pt;
+	font-size: 100%;
+	font-family: inherit;
+	line-height: 40pt;
+	white-space: nowrap;
+	padding: 0pt 15pt;
+	border-bottom: 1pt solid #EEE;
+	width: 100%;
+}
+
+.listingBlank {
+	height: 40pt;
+	font-style: normal;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 0pt;
+	font-size: 100%;
+	font-family: inherit;
+	line-height: 40pt;
+	white-space: nowrap;
+	padding: 0pt 15pt;
+	width: 100%;
+}
+
+.listing:hover {
+	background-color: #EEE;
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+.file {
+	float: left;
+	font-weight: bold;
+	width: 60%;
+}
+
+.filesort {
+	float: left;
+	width: 60%;
+}
+
+.info {
+	float: right;
+	color: #A0A0A0;
+	width: 30%;
+}
+
+.modified {
+	float: left;
+	color: #A0A0A0;
+	width: 60%;
+}
+
+.buttons {
+	float: right;
+	width: 40%;
+	background-repeat:no-repeat;
+	background-position: center center;
+}
+
+.edit {
+	opacity: 0.3;
+}
+
+.edit:hover {
+	opacity: 1;
+}
+
+.delete {
+	background-image: url('../img/delete.png');
+	opacity: 0.3;
+}
+
+.delete:hover {
+	background-image: url('../img/delete-hover.png');
+	opacity: 1;
+}
+
+.indent {
+	margin-left: 10pt;
+}
+
+.notesort {
+	font-weight: normal;
+	color: #A0A0A0;
+}
+
+.sortarrow {
+	background-repeat:no-repeat;
+	background-position: center center;
+	width: 20pt;
+	height: 20pt;
+	float: left;
+	margin-top: 10pt;
+	opacity: 0.3;
+}
+
+.sortup {
+	background-image: url('../img/triangle-n.svg');
+}
+
+.sortdown {
+	background-image: url('../img/triangle-s.svg');
+}
+
+.sorttitle {
+	float: left;
+}
+
+.newfile {
+	display: none;
+}
+
+.fileinput {
+	width: 80pt;
+	height: 36px;
+	display: inline-block;
+	color: #A0A0A0;
+}
+
+.newfileinput {
+	width: 80pt;
+	height: 36px;
+	display: inline-block;
+}
+
+.latestfile {
+	color: red;
+}
+
+#grouplist {
+        /*z-index: 100;*/
+}
+#grouplist .add-note:before {
+    content: "+";
+    font-size: 150%;
+    font-weight: bold;
+    left: 12px;
+    position: absolute;
+}
+#grouplist .add-note {
+    padding: 0 31px;
+}
+#grouplist > li {
+    height: 44px;
+}
+
+#app-navigation .active {
+    font-weight: bold;
+}
+
+#app-navigation .utils {
+    bottom: 0;
+    font-size: 12px;
+    padding: 7px 7px 0 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.action:not(.text), .icon:not(.text), [class^="icon-"]:not(.text), [class*=" icon-"]:not(.text) {
+    display: inline-block;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    width: 16px;
+}
+
+#app-navigation li > .utils > .numnotes {
+    padding-right: 10px;
+    text-align: right;
+}
+
+#app-navigation li > .utils > * {
+    background-size: auto auto;
+    float: left;
+    height: 44px;
+    line-height: 44px;
+    width: 44px;
+}
+
+[class^="icon-"], [class*=" icon-"], .action, .icon {
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+#content li {
+    cursor: default;
+}
+
+#app-navigation li > .utils > *:not(.numnotes):not(.starred) {
+    display: none;
+}
+
+#app-navigation .utils {
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#app-navigation li.active[data-type="category"] > .utils > * {
+    background-color: rgba(0, 0, 0, 0);
+    display: inline-block;
+    float: left;
+}
+
+.oc-addnew {
+    display: block !important;
+    padding: 0 !important;
+}
+
+
+.oc-addnew {
+    display: block !important;
+    padding: 0 !important;
+}
+.oc-addnew > li {
+}
+
+#app-navigation .oc-addnew input[type="text"] {
+    height: 34px !important;
+    margin-left: 6px;
+    margin-top: 5px;
+}
+#app-navigation input[type="text"] {
+    width: 180px;
+}
+.oc-addnew input, .oc-addnew select {
+    border-bottom-right-radius: 0;
+    border-right: 0 none;
+    border-top-right-radius: 0;
+    display: inline-block;
+    float: left;
+    margin: 0 0 5px;
+}
+
+#app-navigation .oc-addnew .new-button {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 16px auto;
+    margin-top: 5px;
+    width: 32px;
+}
+
+.oc-addnew button {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    display: inline-block;
+    float: left;
+    height: 34px !important;
+    margin: 5px 0;
+}
+
+.editing {
+	display: none;
+}
