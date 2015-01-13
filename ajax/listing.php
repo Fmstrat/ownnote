@@ -33,9 +33,10 @@ if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
 	$farray = array();
 	$count = 0;
 	while (($file = readdir($listing)) !== false) {
-		if ($file == "." || $file == "..") continue;
-		if (!endswith($file, ".htm")) continue;
-		if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$file)) {
+		$tmpfile = $file;
+		if ($tmpfile == "." || $tmpfile == "..") continue;
+		if (!endswith($tmpfile, ".htm") && !endswith($tmpfile, ".html")) continue;
+		if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$tmpfile)) {
 			$filetime->setTimestamp($info['mtime']);
 			$difftime = $filetime->diff($now);
 			$years = $difftime->y;
@@ -57,7 +58,11 @@ if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
 			if ($timestring == "" && $minutes > 0) $timestring = "$minutes minutes";
 			if ($timestring == "" && $seconds == 1) $timestring = "$seconds second";
 			if ($timestring == "" && $seconds > 0) $timestring = "$seconds seconds";
-			$filename = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file);
+			if (endswith($tmpfile, ".html")) {
+				$tmpfile = substr($tmpfile,0,-1);
+				if (!\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile)) continue;
+			}
+			$filename = preg_replace('/\\.[^.\\s]{3,4}$/', '', $tmpfile);
 			$group = "";
 			if (substr($filename,0,1) == "[") {
 				$end = strpos($filename, ']');
@@ -66,7 +71,7 @@ if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
 				$filename = trim($filename);
 			}
 			$f = array();
-			$f['file'] = $file;
+			$f['file'] = $tmpfile;
 			$f['filename'] = $filename;
 			$f['group'] = $group;
 			$f['timestring'] = $timestring;
