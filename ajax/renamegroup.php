@@ -6,7 +6,7 @@ $FOLDER = "Notes";
 \OCP\App::checkAppEnabled('ownnote');
 
 if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
-        if (!listing) {
+        if (!$listing) {
                 echo "ERROR: Error listing directory.";
                 exit;
         }

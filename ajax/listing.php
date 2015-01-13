@@ -23,7 +23,7 @@ function endswith($string, $test) {
 
 // Loop through and list files
 if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
-	if (!listing) {
+	if (!$listing) {
 		echo "ERROR: Error listing directory.";
 		exit;
 	}
