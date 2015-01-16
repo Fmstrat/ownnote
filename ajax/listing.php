@@ -13,11 +13,62 @@ if (!\OC\Files\Filesystem::is_dir($FOLDER)) {
 	}
 }
 
+function startsWith($haystack, $needle) {
+	return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== FALSE;
+}
+
 function endswith($string, $test) {
 	$strlen = strlen($string);
 	$testlen = strlen($test);
 	if ($testlen > $strlen) return false;
 	return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
+}
+
+function checkEvernote($folder, $file) {
+	$html = "";
+	if ($html = \OC\Files\Filesystem::file_get_contents($folder."/".$file)) {
+		$DOM = new DOMDocument;
+		$DOM->loadHTML($html);
+		$items = $DOM->getElementsByTagName('meta');
+		$isEvernote = false;
+		for ($i = 0; $i < $items->length; $i++) {
+			$item = $items->item($i);
+			if ($item->hasAttributes()) {
+				$attrs = $item->attributes;
+				foreach ($attrs as $a => $attr) {
+					if ($attr->name == "name") {
+						if ($attr->value == "exporter-version") {
+							$isEvernote = true;
+							continue;
+						}
+					}
+				}
+			}
+		}
+		if ($isEvernote) {
+			$items = $DOM->getElementsByTagName('img');
+			$isEvernote = false;
+			for ($i = 0; $i < $items->length; $i++) {
+				$item = $items->item($i);
+				if ($item->hasAttributes()) {
+					$attrs = $item->attributes;
+					foreach ($attrs as $a => $attr) {
+						if ($attr->name == "src") {
+							$url = $attr->value;
+							if (!startsWith($url, "http") && !startsWith($url, "/") && !startsWith($url,"data")) {
+								if ($data = \OC\Files\Filesystem::file_get_contents($folder."/".$url)) {
+									$type = pathinfo($url, PATHINFO_EXTENSION);
+									$base64 = "data:image/".$type.";base64,".base64_encode($data);
+									$html = str_replace($url, $base64, $html);
+								}
+							}
+						}
+					}
+				}
+			}
+			\OC\Files\Filesystem::file_put_contents($folder."/".$file, $html);
+		}
+	}
 }
 
 
@@ -59,8 +110,13 @@ if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
 			if ($timestring == "" && $seconds == 1) $timestring = "$seconds second";
 			if ($timestring == "" && $seconds > 0) $timestring = "$seconds seconds";
 			if (endswith($tmpfile, ".html")) {
+				checkEvernote($FOLDER, $tmpfile);
 				$tmpfile = substr($tmpfile,0,-1);
-				if (!\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile)) continue;
+				if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile)) {
+					if (!\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile)) continue;
+				} else {
+					continue;
+				}
 			}
 			$filename = preg_replace('/\\.[^.\\s]{3,4}$/', '', $tmpfile);
 			$group = "";

@@ -19,8 +19,12 @@ if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
 				$filename = substr($file, $end+1, strlen($file)-$end+1);
 				$filename = trim($filename);
 				$filename = "[".$_POST['editgroupname']."] ".$filename;
-				if (\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$filename)) {
-					echo "SUCCESS";
+				if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$filename)) {
+					if (\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$filename)) {
+						echo "SUCCESS";
+					} else {
+						echo "FAIL";
+					}
 				} else {
 					echo "FAIL";
 				}
