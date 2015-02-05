@@ -16,6 +16,7 @@ use \OCP\AppFramework\App;
 use \OCP\IContainer;
 
 use \OCA\OwnNote\Controller\PageController;
+use \OCA\OwnNote\Controller\OwnnoteApiController;
 
 
 class Application extends App {
@@ -36,6 +37,13 @@ class Application extends App {
 				$c->query('UserId')
 			);
 		});
+
+                $container->registerService('OwnnoteApiController', function($c){
+                        return new OwnnoteApiController(
+                                $c->query('AppName'),
+                                $c->query('Request')
+                        );
+                });
 
 
 		/**

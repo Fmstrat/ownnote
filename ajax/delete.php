@@ -1,16 +1,12 @@
 <?php
 
-$FOLDER = "Notes";
-
 \OCP\User::checkLoggedIn();
 \OCP\App::checkAppEnabled('ownnote');
 
-if (isset($_GET['id']) && $_GET['id'] != '') {
-	$TARGET=$FOLDER."/".$_GET['id'];
+require_once 'ownnote/lib/backend.php';
 
-	if (\OC\Files\Filesystem::file_exists($TARGET)) {
-		\OC\Files\Filesystem::unlink($TARGET);
-	}
+if (isset($_GET['id']) && $_GET['id'] != '') {
+	echo deleteNote("Notes", $_GET['id']);
 }
 
 ?>

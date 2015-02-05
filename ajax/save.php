@@ -1,10 +1,10 @@
 <?php
 
-$FOLDER = "Notes";
-
 \OCP\User::checkLoggedIn();
 \OCP\App::checkAppEnabled('ownnote');
 
-\OC\Files\Filesystem::file_put_contents($FOLDER."/".$_POST['editfilename'].".htm", $_POST['content']);
+require_once 'ownnote/lib/backend.php';
+
+echo saveNote("Notes", $_POST['editfilename'], $_POST['content']);
 
 ?>
