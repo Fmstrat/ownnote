@@ -51,8 +51,6 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["note"]))
 		return editNote("Notes", $_GET["note"].".htm");
-	elseif (isset($_POST["note"]))
-		return editNote("Notes", $_POST["note"].".htm");
     }
 
     /**
@@ -64,8 +62,6 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["note"]))
 		return deleteNote("Notes", $_GET["note"].".htm");
-	elseif (isset($_POST["note"]))
-		return deleteNote("Notes", $_POST["note"].".htm");
     }
 
     /**
@@ -77,8 +73,6 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["note"]) && isset($_GET["newnote"]))
 		return renameNote("Notes", $_GET["note"], $_GET["newnote"]);
-	elseif (isset($_POST["note"]) && isset($_POST["newnote"]))
-		return renameNote("Notes", $_POST["note"], $_POST["newnote"]);
     }
 
     /**
@@ -90,8 +84,6 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["note"]) && isset($_GET["content"]))
 		return saveNote("Notes", $_GET["note"], $_GET["content"]);
-	elseif (isset($_POST["note"]) && isset($_POST["content"]))
-		return saveNote("Notes", $_POST["note"], $_POST["content"]);
     }
 
     /**
@@ -103,8 +95,6 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["note"]))
 		return createNote("Notes", $_GET["note"]);
-	elseif (isset($_POST["note"]))
-		return createNote("Notes", $_POST["note"]);
     }
 
     /**
@@ -116,8 +106,6 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["group"]))
 		return deleteGroup("Notes", $_GET["group"]);
-	if (isset($_POST["group"]))
-		return deleteGroup("Notes", $_POST["group"]);
     }
 
     /**
@@ -129,7 +117,5 @@ class OwnnoteApiController extends ApiController {
 	require_once 'ownnote/lib/backend.php';
 	if (isset($_GET["group"]) && isset($_GET["newgroup"]))
 		return renameGroup("Notes", $_GET["group"], $_GET["newgroup"]);
-	elseif (isset($_POST["group"]) && isset($_POST["newgroup"]))
-		return renameGroup("Notes", $_POST["group"], $_POST["newgroup"]);
     }
 }
