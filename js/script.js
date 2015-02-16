@@ -24,14 +24,23 @@
 		});
 	}
 
+	function ocUrl(url) {
+		var newurl = OC.linkTo("ownnote",url).replace("apps/ownnote","index.php/apps/ownnote");
+		return newurl;
+	}
+
+	function ocVar(val) {
+		var newval = encodeURIComponent(val);
+		return newval;
+	}
+
 	function resizeFont(s) {
 		$('#editable_ifr').contents().find("head").append($("<style type='text/css'>  body{font-size:"+s+"px;}  </style>"));
 	}
 
 	function deleteNote(id) {
-		var url = OC.linkTo("ownnote","ajax/delete.php");
-		url += "?id=" + $(this).attr('id');
-		$.get(url, function(data) {
+		var n = ocVar($(this).attr('id'));
+		$.post(ocUrl("api/v0.2/ownnote/del"), { note: n }, function (data) {
 			loadListing();
 		});
 	}
@@ -43,9 +52,7 @@
 		if (f[0] == '[') {
 			g = f.match(/\[(.*?)\]/i)[1];
 		}
-		var url = OC.linkTo("ownnote","ajax/edit.php");
-		url += "?id=" + f;
-		$.get(url, function(data) {
+		$.post(ocUrl("api/v0.2/ownnote/edit"), { note: f }, function (data) {
 			buildEdit(t, g, data);
 		});
 	}
@@ -108,9 +115,9 @@
 				editfilename = '['+editgroup+'] '+editfilename;
 			if (originalgroup != '')
 				originalfilename = '['+originalgroup+'] '+originalfilename;
-			$.post(OC.linkTo("ownnote","ajax/rename.php"), { originalfilename: originalfilename, editfilename: editfilename }, function (data) {
+			$.post(ocUrl("api/v0.2/ownnote/ren"), { note: originalfilename, newnote: editfilename }, function (data) {
 				if (data == "SUCCESS") {
-					$.post(OC.linkTo("ownnote","ajax/save.php"), { content: content, editfilename: editfilename }, function (data) {
+					$.post(ocUrl("api/v0.2/ownnote/save"), { content: content, note: editfilename }, function (data) {
 						loadListing();
 					});
 				}
@@ -118,7 +125,7 @@
 		} else {
 			if (editgroup != '')
 				editfilename = '['+editgroup+'] '+editfilename;
-			$.post(OC.linkTo("ownnote","ajax/save.php"), { content: content, editfilename: editfilename }, function (data) {
+			$.post(ocUrl("api/v0.2/ownnote/save"), { content: content, note: editfilename }, function (data) {
 				loadListing();
 			});
 		}
@@ -131,7 +138,8 @@
 	var sortorder = "ascending";
 
 	function loadListing() {
-		$.get(OC.linkTo("ownnote","ajax/listing.php"), function(data) {
+		var url = ocUrl("api/v0.2/ownnote");
+		$.get(url, function(data) {
 			filelist = data;
 			listing = jQuery.parseJSON(filelist);
 			buildNav('All');
@@ -220,13 +228,13 @@
 					if (listing[i].timediff < 30)
 						fileclass = 'modified latestfile';
 					html += "<div class='listing'>";
-					html += "	<div id='"+listing[i].file+"' title='"+listing[i].filename+"' class='file pointer'>"+listing[i].filename+"</div>";
+					html += "	<div id='"+listing[i].file.replace('.htm','')+"' title='"+listing[i].filename+"' class='file pointer'>"+listing[i].filename+"</div>";
 					html += "	<div class='info'>";
 					if (listing[i].timestring != '')
 						html += "		<div class='"+fileclass+"'>"+listing[i].timestring+" ago</div>";
 					else
 						html += "		<div class='"+fileclass+"'>Just now</div>";
-					html += "		<div id='"+listing[i].file+"' class='buttons delete delete-note pointer'><br></div>";
+					html += "		<div id='"+listing[i].filename+"' class='buttons delete delete-note pointer'><br></div>";
 					html += "	</div>";
 					html += "</div>";
 				}
@@ -256,10 +264,9 @@
 	}
 
 	function createNote() {
-		var url = OC.linkTo("ownnote","ajax/create.php");
-		url += "?id=" + $('#newfilename').val();
+		var n = $('#newfilename').val();
 		cancelNote();
-		$.get(url, function(data) {
+		$.post(ocUrl("api/v0.2/ownnote/create"), { note: n }, function (data) {
 			loadListing();
 		});
 	}
@@ -395,7 +402,7 @@
 
 	function deleteGroup() {
 		var g = $(this).attr('group');
-		$.post(OC.linkTo("ownnote","ajax/deletegroup.php"), { group: g }, function (data) {
+		$.post(ocUrl("api/v0.2/ownnote/delgroup"), { group: g }, function (data) {
 			switchgroup = "All";
 			loadListing();
 		});
@@ -415,7 +422,7 @@
 	function saveGroup() {
 		var v = $("[id='"+this.id+"-text']").val();
 		if (v != cg && v.toLowerCase() != "all" && v.toLowerCase() != "not grouped") {
-			$.post(OC.linkTo("ownnote","ajax/renamegroup.php"), { originalgroupname: cg, editgroupname: v }, function (data) {
+			$.post(ocUrl("api/v0.2/ownnote/rengroup"), { group: cg, newgroup: v }, function (data) {
 				switchgroup = v;
 				cg = "";
 				loadListing();

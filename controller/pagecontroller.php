@@ -41,14 +41,12 @@ class PageController extends Controller {
         return new TemplateResponse('ownnote', 'main', $params);  // templates/main.php
     }
 
-
     /**
-     * Simply method that posts back the payload of the request
      * @NoAdminRequired
+     * @NoCSRFRequired
      */
-    public function doEcho($echo) {
-        return array('echo' => $echo);
+    public function listing() {
+        $params = array('user' => $this->userId);
+        return new TemplateResponse('ownnote', 'listing', $params);  // templates/main.php
     }
-
-
 }
