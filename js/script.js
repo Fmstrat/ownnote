@@ -29,17 +29,12 @@
 		return newurl;
 	}
 
-	function ocVar(val) {
-		var newval = encodeURIComponent(val);
-		return newval;
-	}
-
 	function resizeFont(s) {
 		$('#editable_ifr').contents().find("head").append($("<style type='text/css'>  body{font-size:"+s+"px;}  </style>"));
 	}
 
 	function deleteNote(id) {
-		var n = ocVar($(this).attr('id'));
+		var n = $(this).attr('id');
 		$.post(ocUrl("api/v0.2/ownnote/del"), { note: n }, function (data) {
 			loadListing();
 		});
@@ -234,7 +229,7 @@
 						html += "		<div class='"+fileclass+"'>"+listing[i].timestring+" ago</div>";
 					else
 						html += "		<div class='"+fileclass+"'>Just now</div>";
-					html += "		<div id='"+listing[i].filename+"' class='buttons delete delete-note pointer'><br></div>";
+					html += "		<div id='"+listing[i].file.replace('.htm','')+"' class='buttons delete delete-note pointer'><br></div>";
 					html += "	</div>";
 					html += "</div>";
 				}
