@@ -252,7 +252,7 @@
 		}
 		document.getElementById("ownnote").innerHTML = html;
 		$('#newfilename').css('color', '#A0A0A0');
-			buildGroupSelectOptions();
+		buildGroupSelectOptions();
 		bindListing();
 	}
 
