@@ -130,7 +130,7 @@
 	float: left;
 }
 
-.newfile {
+.newfile, #controls .note-title-form .newgroupinput {
 	display: none;
 }
 

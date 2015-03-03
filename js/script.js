@@ -75,12 +75,15 @@
 		var html = "";
 		html += "<div id='controls'>";
 		html += "	<div id='newfile' class='indent'>";
-		html += "		Name: <input type='text' class='fileinput' id='editfilename' value='"+t+"'>";
-		html += "		&nbsp;&nbsp;Group: <input type='text' class='fileinput' id='editgroup' value='"+g+"'>";
-		html += "		<input type='hidden' id='originalfilename' value='"+t+"'>";
-		html += "		<input type='hidden' id='originalgroup' value='"+g+"'>";
-		html += "		<div id='save' class='button'>Save</div>";
-		html += "		<div id='canceledit' class='button'>Cancel</div>";
+		html += "		<form id='editform' class='note-title-form'>";
+		html += "			Name: <input type='text' class='fileinput' id='editfilename' value='"+t+"'>";
+		html += "			&nbsp;&nbsp;Group: <select id='groupname'></select>";
+		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
+		html += "			<input type='hidden' id='originalfilename' value='"+t+"'>";
+		html += "			<input type='hidden' id='originalgroup' value='"+g+"'>";
+		html += "			<button id='save' class='button'>Save</button>";
+		html += "			<div id='canceledit' class='button'>Cancel</div>";
+		html += "		</form>";
 		html += "	</div>";
 		html += "</div>";
 		html += "<div class='listingBlank'><!-- --></div>";
@@ -89,22 +92,29 @@
 		html += "</div>";
 		document.getElementById("ownnote").innerHTML = html;
 		tinymceInit();
+		buildNav(g);
+		listingtype = g;
+		buildGroupSelectOptions();
 		bindEdit();
 	}
 
 	function bindEdit() {
-		$("#save").bind("click", saveNote);
+		$("#editform").bind("submit", saveNote);
 		$("#canceledit").bind("click", buildListing);
+		$("#groupname").bind("change", checkNewGroup);
 	}
 
 	function saveNote() {
 		var editfilename = $('#editfilename').val();
-		var editgroup = $('#editgroup').val();
+		var editgroup = $('#groupname').val();
 		var originalfilename = $('#originalfilename').val();
 		var originalgroup = $('#originalgroup').val();
 		var content = tinymce.activeEditor.getContent();
-		if (editgroup.toLowerCase() == "all" || editgroup.toLowerCase() == "not grouped")
+		if (editgroup.toLowerCase() == "all" || editgroup.toLowerCase() == "not grouped") {
 			editgroup = "";
+		} else if (editgroup == '_new') {
+			editgroup = $('#newgroupname').val();
+		}
 		if (editfilename != originalfilename || editgroup != originalgroup) {
 			if (editgroup != '')
 				editfilename = '['+editgroup+'] '+editfilename;
@@ -124,6 +134,7 @@
 				loadListing();
 			});
 		}
+		return false;
 	}
 
 	var filelist = "";
@@ -162,9 +173,13 @@
 		html += "<div id='controls'>";
 		html += "	<div id='new' class='button indent'>New</div>";
 		html += "	<div id='newfile' class='newfile indent'>";
-		html += "		<input type='text' class='newfileinput' id='newfilename' value='note title'>";
-		html += "		<div id='create' class='button'>Create</div>";
-		html += "		<div id='cancel' class='button'>Cancel</div>";
+		html += "		<form id='createform' class='note-title-form'>";
+		html += "			<input type='text' class='newfileinput' id='newfilename' value='note title'>";
+		html += "			<select id='groupname'></select>";
+		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
+		html += "			<button id='create' class='button'>Create</button>";
+		html += "			<div id='cancel' class='button'>Cancel</div>";
+		html += "		</form>";
 		html += "	</div>";
 		html += "</div>";
 		html += "<div class='listingBlank'><!-- --></div>";
@@ -237,7 +252,21 @@
 		}
 		document.getElementById("ownnote").innerHTML = html;
 		$('#newfilename').css('color', '#A0A0A0');
+		buildGroupSelectOptions();
 		bindListing();
+	}
+
+	function buildGroupSelectOptions() {
+		var $select = $('select#groupname');
+		$select.append($('<option value="">Not grouped</option>'));
+		$select.append($('<option>').attr('value', '_new').text('New group'));
+		$(groups).each(function(i, group) {
+			var option = $('<option>').attr('value', group).text(group);
+			if(group == listingtype) {
+				option.attr('selected', 'selected');
+			}
+			$select.append(option);
+		});
 	}
 
 	function bindListing() {
@@ -247,8 +276,18 @@
 		$("#sortmod").bind("click", sortMod);
 		$("#new").bind("click", addNote);
 		$("#cancel").bind("click", cancelNote);
-		$("#create").bind("click", createNote);
+		$("#createform").bind("submit", createNote);
+		$("#groupname").bind("change", checkNewGroup);
 		$("#newfilename").bind("focus", newNote);
+	}
+
+	function checkNewGroup() {
+		var selectVal = $('select#groupname').val();
+		if(selectVal == '_new') {
+			$('#newgroupname').css('display','inline-block');
+		} else {
+			$('#newgroupname').css('display','none');
+		}
 	}
 
 	function newNote() {
@@ -260,10 +299,19 @@
 
 	function createNote() {
 		var n = $('#newfilename').val();
+		var group = $('#groupname').val();
+
+		if (group == '_new') {
+			group = $('#newgroupname').val();
+		}
+
+		if (group != '')
+			n = '['+ group +'] '+ n;
 		cancelNote();
 		$.post(ocUrl("api/v0.2/ownnote/create"), { note: n }, function (data) {
 			loadListing();
 		});
+		return false;
 	}
 
 	function sortName() {
