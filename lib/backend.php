@@ -63,6 +63,9 @@ function checkEvernote($folder, $file) {
 }
 
 function getListing($FOLDER) {
+	// Get the listing from the database
+	$query = OCP\DB::prepare('SELECT id, file, mtime FROM *PREFIX*shorten WHERE deleted=0');
+	$results = $query->execute()->fetchAll();
 	// Create directory if it doesn't exist
 	if (!\OC\Files\Filesystem::is_dir($FOLDER)) {
 		if (!\OC\Files\Filesystem::mkdir($FOLDER))  {
@@ -123,6 +126,18 @@ function getListing($FOLDER) {
 					$group = substr($filename, 1, $end-1);	
 					$filename = substr($filename, $end+1, strlen($filename)-$end+1);
 					$filename = trim($filename);
+				}
+				$fileindb = false;
+				if ($results)
+					foreach($results as $result)
+						if ($tmpfile == $result['file'])
+							$fileindb = true;
+				if (! $fileindb) {
+					$query = OCP\DB::prepare('INSERT INTO *PREFIX*ownnote (file, mtime, note) VALUES (?,?,?)');
+					$html = "";
+					$html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile);
+					$query->execute(Array($tmpfile,$info['mtime'],$html));
+					$id = OCP\DB::insertid('*PREFIX*ownnote');
 				}
 				$f = array();
 				$f['file'] = $tmpfile;

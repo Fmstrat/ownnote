@@ -17,6 +17,7 @@ use \OCP\IContainer;
 
 use \OCA\OwnNote\Controller\PageController;
 use \OCA\OwnNote\Controller\OwnnoteApiController;
+//use \OCA\OwnNote\Db\AuthorDAO;
 
 
 class Application extends App {
@@ -52,8 +53,12 @@ class Application extends App {
 		$container->registerService('UserId', function(IContainer $c) {
 			return \OCP\User::getUser();
 		});		
-		
+
+		/**
+		 * Database Layer
+		 */
+		//$container->registerService('AuthorDAO', function($c) {
+			//return new AuthorDAO($c->query('ServerContainer')->getDb());
+		//});
 	}
-
-
 }
