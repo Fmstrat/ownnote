@@ -172,9 +172,9 @@ function getListing($FOLDER) {
 		if ($results)
 			foreach($results as $result)
 				if ($result['deleted'] == 0) {
-					$tmpfile = $result['name']."htm";
+					$tmpfile = $result['name'].".htm";
 					if ($result['grouping'] != '')
-						$tmpfile = '['.$result['grouping'].'] '.$result['name'].'htm';
+						$tmpfile = '['.$result['grouping'].'] '.$result['name'].'.htm';
 					$filefound = false;
 					foreach ($filearr as $f)
 						if ($f == $tmpfile) {
