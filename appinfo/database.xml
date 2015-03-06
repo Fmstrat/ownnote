@@ -22,26 +22,26 @@
 				<length>255</length>
 			</field>
 			<field>
-				<name>file</name>
+				<name>name</name>
 				<type>text</type>
 				<notnull>true</notnull>
 				<length>255</length>
 			</field>
 			<field>
-				<name>group</name>
+				<name>grouping</name>
 				<type>text</type>
 				<notnull>true</notnull>
 				<length>255</length>
 			</field>
 			<field>
 				<name>mtime</name>
-				<type>int</type>
+				<type>integer</type>
 				<notnull>true</notnull>
 				<length>32</length>
 			</field>
 			<field>
 				<name>deleted</name>
-				<type>int</type>
+				<type>integer</type>
 				<notnull>true</notnull>
 				<default>0</default>
 				<length>1</length>

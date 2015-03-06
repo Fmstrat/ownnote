@@ -3,7 +3,7 @@
 \OCP\Util::addScript('ownnote','tinymce/tinymce.min');
 \OCP\Util::addStyle('ownnote', 'style');
 
-$FOLDER = "Notes";
+$FOLDER="Notes";
 
 ?>
 
