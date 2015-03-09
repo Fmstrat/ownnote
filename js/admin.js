@@ -13,12 +13,13 @@ $(document).ready(function() {
 	$('#ownnote-type').change(function() {
 		var val = $(this).val();
 		if (val == "") {
+			$('#ownnote-folder').val('');
 			$('#shorten-folder-settings').css('display', 'none');
 			$.post(ocOwnnoteUrl("setval"), { folder: '' }, function (data) {
 				console.log('response', data);
 			});
 		} else
-			$('#shorten-googl-settings').css('display', 'block');
+			$('#shorten-folder-settings').css('display', 'block');
 	});
 });
 
