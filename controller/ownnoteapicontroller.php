@@ -38,7 +38,18 @@ class OwnnoteApiController extends ApiController {
 	public function index() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		require_once 'ownnote/lib/backend.php';
-		return json_encode(getListing($FOLDER));
+		return json_encode(getListing($FOLDER, false));
+	}
+
+	/**
+	* @NoAdminRequired
+	* @CORS
+	* @NoCSRFRequired
+	*/
+	public function remoteindex() {
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		require_once 'ownnote/lib/backend.php';
+		return json_encode(getListing($FOLDER, true));
 	}
 
 	/**

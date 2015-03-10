@@ -86,10 +86,10 @@ function getTimeString($filetime, $now) {
 	return $timestring;
 }
 
-function getListing($FOLDER) {
+function getListing($FOLDER, $showdel) {
 	// Get the listing from the database
 	$uid = \OCP\User::getUser();
-	$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=?");
+	$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
 	$results = $query->execute(Array($uid))->fetchAll();
 	// Create directory if it doesn't exist
 	$farray = array();
@@ -165,7 +165,7 @@ function getListing($FOLDER) {
 			}
 		}
 		if ($requery) {
-			$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=?");
+			$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
 			$results = $query->execute(Array($uid))->fetchAll();
 		}
 		// Now also make sure the files exist, they may not if the user switched folders in admin.
@@ -193,7 +193,7 @@ function getListing($FOLDER) {
 		$now = new DateTime();
 		$filetime = new DateTime();
 		foreach($results as $result)
-			if ($result['deleted'] == 0) {
+			if ($result['deleted'] == 0 || $showdel == true) {
 				$filetime->setTimestamp($result['mtime']);
 				$timestring = getTimeString($filetime, $now);
 				$f = array();
@@ -224,6 +224,10 @@ function createNote($FOLDER, $name, $group) {
 			$fileindb = true;
 		else
 			$filedeldb = true;
+	if ($filedeldb) {
+		$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+		$results = $query->execute(Array($uid, $name, $group));
+	}
 	if (! $fileindb) {
 		if ($FOLDER != '') {
 			$tmpfile = $FOLDER."/".$name.".htm";
@@ -235,10 +239,6 @@ function createNote($FOLDER, $name, $group) {
 			if ($info = \OC\Files\Filesystem::getFileInfo($tmpfile)) {
 				$mtime = $info['mtime'];
 			}
-		}
-		if ($filedeldb) {
-			$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($uid, $name, $group));
 		}
 		$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note) VALUES (?,?,?,?,?)");
 		$query->execute(Array($uid,$name,$group,$mtime,''));
