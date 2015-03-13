@@ -11,6 +11,7 @@
 
 namespace OCA\OwnNote\AppInfo;
 
+\OCP\App::registerAdmin('ownnote', 'admin');
 
 \OCP\App::addNavigationEntry(array(
     // the string under which your app will be referenced in owncloud

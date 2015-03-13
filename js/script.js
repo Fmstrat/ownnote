@@ -34,21 +34,18 @@
 	}
 
 	function deleteNote(id) {
-		var n = $(this).attr('id');
-		$.post(ocUrl("api/v0.2/ownnote/del"), { note: n }, function (data) {
+		var n = $(this).attr('n');
+		var g = $(this).attr('g');
+		$.post(ocUrl("api/v0.2/ownnote/del"), { name: n, group: g }, function (data) {
 			loadListing();
 		});
 	}
 
 	function editNote(id) {
-		var t = this.title;
-		var f = $(this).attr('id');
-		var g = '';
-		if (f[0] == '[') {
-			g = f.match(/\[(.*?)\]/i)[1];
-		}
-		$.post(ocUrl("api/v0.2/ownnote/edit"), { note: f }, function (data) {
-			buildEdit(t, g, data);
+		var n = $(this).attr('n');
+		var g = $(this).attr('g');
+		$.post(ocUrl("api/v0.2/ownnote/edit"), { name: n, group: g }, function (data) {
+			buildEdit(n, g, data);
 		});
 	}
 
@@ -70,16 +67,16 @@
 		h = $(window).height() - o.top;
 	}
 
-	function buildEdit(t, g, data) {
+	function buildEdit(n, g, data) {
 		resizeContainer();
 		var html = "";
 		html += "<div id='controls'>";
 		html += "	<div id='newfile' class='indent'>";
 		html += "		<form id='editform' class='note-title-form'>";
-		html += "			Name: <input type='text' class='fileinput' id='editfilename' value='"+t+"'>";
+		html += "			Name: <input type='text' class='fileinput' id='editfilename' value='"+n+"'>";
 		html += "			&nbsp;&nbsp;Group: <select id='groupname'></select>";
 		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
-		html += "			<input type='hidden' id='originalfilename' value='"+t+"'>";
+		html += "			<input type='hidden' id='originalfilename' value='"+n+"'>";
 		html += "			<input type='hidden' id='originalgroup' value='"+g+"'>";
 		html += "			<button id='save' class='button'>Save</button>";
 		html += "			<div id='canceledit' class='button'>Cancel</div>";
@@ -116,21 +113,27 @@
 			editgroup = $('#newgroupname').val();
 		}
 		if (editfilename != originalfilename || editgroup != originalgroup) {
-			if (editgroup != '')
-				editfilename = '['+editgroup+'] '+editfilename;
-			if (originalgroup != '')
-				originalfilename = '['+originalgroup+'] '+originalfilename;
-			$.post(ocUrl("api/v0.2/ownnote/ren"), { note: originalfilename, newnote: editfilename }, function (data) {
-				if (data == "SUCCESS") {
-					$.post(ocUrl("api/v0.2/ownnote/save"), { content: content, note: editfilename }, function (data) {
-						loadListing();
-					});
-				}
-			});
+			var c = listing.length;
+			var exists = false;
+			for (i = 0; i < c; i++) {
+				if (listing[i].deleted == 0)
+					if (listing[i].group == editgroup && listing[i].name == editfilename) {
+						exists = true;
+						break;
+					}
+			}
+			if (exists) {
+				alert("Filename/group already exists.");
+			} else
+				$.post(ocUrl("api/v0.2/ownnote/ren"), { name: originalfilename, group: originalgroup, newname: editfilename, newgroup: editgroup }, function (data) {
+					if (data == "DONE") {
+						$.post(ocUrl("api/v0.2/ownnote/save"), { name: editfilename, group: editgroup, content: content }, function (data) {
+							loadListing();
+						});
+					}
+				});
 		} else {
-			if (editgroup != '')
-				editfilename = '['+editgroup+'] '+editfilename;
-			$.post(ocUrl("api/v0.2/ownnote/save"), { content: content, note: editfilename }, function (data) {
+			$.post(ocUrl("api/v0.2/ownnote/save"), { name: editfilename, group: editgroup, content: content }, function (data) {
 				loadListing();
 			});
 		}
@@ -198,7 +201,7 @@
 				html += "	<div class='info'>";
 				html += "		<div class='modified notesort'><span class='pointer' id='sortmod'>Modified</span></div>";
 				html += "	</div>";
-				listing.sort(sort_by('filename', true, function(a){return a.toUpperCase()}));
+				listing.sort(sort_by('name', true, function(a){return a.toUpperCase()}));
 			} else if (sortby == "name" && sortorder == "descending") {
 				html += "	<div class='filesort notesort'>";
 				html += "		<div class='pointer sorttitle' id='sortname'>Name</div>";
@@ -207,7 +210,7 @@
 				html += "	<div class='info'>";
 				html += "		<div class='modified notesort'><span class='pointer' id='sortmod'>Modified</span></div>";
 				html += "	</div>";
-				listing.sort(sort_by('filename', false, function(a){return a.toUpperCase()}));
+				listing.sort(sort_by('name', false, function(a){return a.toUpperCase()}));
 			} else if (sortby == "mod" && sortorder == "ascending") {
 				html += "	<div class='filesort notesort'>";
 				html += "		<div class='pointer sorttitle' id='sortname'>Name</div>";
@@ -233,21 +236,25 @@
 			}
 			html += "</div>";
 			for (i = 0; i < c; i++) {
-				if (listingtype == "All" || listing[i].group == listingtype || (listingtype == 'Not grouped' && listing[i].group == '')) {
-					var fileclass = 'modified';
-					if (listing[i].timediff < 30)
-						fileclass = 'modified latestfile';
-					html += "<div class='listing'>";
-					html += "	<div id='"+listing[i].file.replace('.htm','')+"' title='"+listing[i].filename+"' class='file pointer'>"+listing[i].filename+"</div>";
-					html += "	<div class='info'>";
-					if (listing[i].timestring != '')
-						html += "		<div class='"+fileclass+"'>"+listing[i].timestring+" ago</div>";
-					else
-						html += "		<div class='"+fileclass+"'>Just now</div>";
-					html += "		<div id='"+listing[i].file.replace('.htm','')+"' class='buttons delete delete-note pointer'><br></div>";
-					html += "	</div>";
-					html += "</div>";
-				}
+				if (listing[i].deleted == 0)
+					if (listingtype == "All" || listing[i].group == listingtype || (listingtype == 'Not grouped' && listing[i].group == '')) {
+						var fileclass = 'modified';
+						var file = listing[i].name;
+						if (listing[i].group != '')
+							file = "["+listing[i].group+"] "+listing[i].name;
+						if (listing[i].timediff < 30)
+							fileclass = 'modified latestfile';
+						html += "<div class='listing'>";
+						html += "	<div id='"+file+"' i='"+listing[i].id+"' n='"+listing[i].name+"' g='"+listing[i].group+"' title='"+listing[i].name+"' class='file pointer'>"+listing[i].name+"</div>";
+						html += "	<div class='info'>";
+						if (listing[i].timestring != '')
+							html += "		<div class='"+fileclass+"'>"+listing[i].timestring+" ago</div>";
+						else
+							html += "		<div class='"+fileclass+"'>Just now</div>";
+						html += "		<div id='"+file+"' i='"+listing[i].id+"' n='"+listing[i].name+"' g='"+listing[i].group+"' class='buttons delete delete-note pointer'><br></div>";
+						html += "	</div>";
+						html += "</div>";
+					}
 			}
 		}
 		document.getElementById("ownnote").innerHTML = html;
@@ -298,17 +305,13 @@
 	}
 
 	function createNote() {
-		var n = $('#newfilename').val();
+		var name = $('#newfilename').val();
 		var group = $('#groupname').val();
-
 		if (group == '_new') {
 			group = $('#newgroupname').val();
 		}
-
-		if (group != '')
-			n = '['+ group +'] '+ n;
 		cancelNote();
-		$.post(ocUrl("api/v0.2/ownnote/create"), { note: n }, function (data) {
+		$.post(ocUrl("api/v0.2/ownnote/create"), { name: name, group: group }, function (data) {
 			loadListing();
 		});
 		return false;
@@ -445,10 +448,24 @@
 
 	function deleteGroup() {
 		var g = $(this).attr('group');
-		$.post(ocUrl("api/v0.2/ownnote/delgroup"), { group: g }, function (data) {
-			switchgroup = "All";
-			loadListing();
-		});
+		var c = listing.length;
+		var exists = false;
+		for (i = 0; i < c; i++)
+			if (listing[i].deleted == 0)
+				if (listing[i].group.toLowerCase() == g.toLowerCase())
+					for (j = 0; j < c; j++)
+						if (listing[j].deleted == 0)
+							if (listing[j].group == '' && listing[i].name.toLowerCase() == listing[j].name.toLowerCase()) {
+								exists = true;
+								break;
+							}
+		if (exists)
+			alert('An ungrouped file has the same name as a file in this group.');
+		else
+			$.post(ocUrl("api/v0.2/ownnote/delgroup"), { group: g }, function (data) {
+				switchgroup = "All";
+				loadListing();
+			});
 	}
 
 	var cg = "";
@@ -464,12 +481,23 @@
 
 	function saveGroup() {
 		var v = $("[id='"+this.id+"-text']").val();
+		var c = listing.length;
 		if (v != cg && v.toLowerCase() != "all" && v.toLowerCase() != "not grouped") {
-			$.post(ocUrl("api/v0.2/ownnote/rengroup"), { group: cg, newgroup: v }, function (data) {
-				switchgroup = v;
-				cg = "";
-				loadListing();
-			});
+			var exists = false;
+			for (i = 0; i < c; i++)
+				if (listing[i].deleted == 0)
+					if (listing[i].group.toLowerCase() == v.toLowerCase()) {
+						exists = true;
+						break;
+					}
+			if (exists)
+				alert("Group already exists.");
+			else
+				$.post(ocUrl("api/v0.2/ownnote/rengroup"), { group: cg, newgroup: v }, function (data) {
+					switchgroup = v;
+					cg = "";
+					loadListing();
+				});
 		} else {
 			switchgroup = v;
 			cg = "";

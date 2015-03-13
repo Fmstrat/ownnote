@@ -40,13 +40,4 @@ class PageController extends Controller {
         $params = array('user' => $this->userId);
         return new TemplateResponse('ownnote', 'main', $params);  // templates/main.php
     }
-
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function listing() {
-        $params = array('user' => $this->userId);
-        return new TemplateResponse('ownnote', 'listing', $params);  // templates/main.php
-    }
 }
