@@ -17,7 +17,7 @@ function endswith($string, $test) {
 
 function getAnnouncement() {
 	$ret = "";
-	$url = 'https://raw.githubusercontent.com/Fmstrat/ownnote/master/README.md';
+	$url = 'https://raw.githubusercontent.com/Fmstrat/ownnote/master/announcement/announcement.html';
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
