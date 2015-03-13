@@ -57,6 +57,16 @@ class OwnnoteApiController extends ApiController {
 	* @CORS
 	* @NoCSRFRequired
 	*/
+	public function announcement() {
+		require_once 'ownnote/lib/backend.php';
+		return getAnnouncement();
+	}
+
+	/**
+	* @NoAdminRequired
+	* @CORS
+	* @NoCSRFRequired
+	*/
 	public function create() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		require_once 'ownnote/lib/backend.php';

@@ -1,4 +1,5 @@
 
+	var announcement = true;
 	
 	function tinymceInit() {
 		tinymce.init({
@@ -420,8 +421,22 @@
 			else
 				html += buildNavItem(groups[i], counts[i], false);
 		}
+		if (announcement)
+			loadAnnouncement();
+		html += "<div id='announcement-container'></div>";
 		$('#grouplist').html(html);
 		bindNav();
+		loadAnnouncement();
+	}
+
+	function loadAnnouncement() {
+		var url = ocUrl("api/v0.2/ownnote/announcement");
+		$.get(url, function(data) {
+			if (data != '') {
+				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement' class='announcement'>"+data+"</div></div></div>";
+				$('#announcement-container').html(data);
+			}
+		});
 	}
 
 	function selectGroup() {

@@ -280,3 +280,7 @@
 .editing {
 	display: none;
 }
+
+.announcement {
+	padding: 10px;
+}
