@@ -34,6 +34,12 @@
 				<length>255</length>
 			</field>
 			<field>
+				<name>shared</name>
+				<type>clob</type>
+				<notnull>true</notnull>
+				<default></default>
+			</field>
+			<field>
 				<name>mtime</name>
 				<type>integer</type>
 				<notnull>true</notnull>
