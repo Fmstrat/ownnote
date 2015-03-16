@@ -429,7 +429,6 @@
 	function loadAnnouncement() {
 		var curAnnouncement = getCookie('curAnnouncement');
 		var dismissedAnnouncement = getCookie('dismissedAnnouncement');
-		alert(curAnnouncement+"\n"+dismissedAnnouncement);
 		if (curAnnouncement != "") {
 			if (curAnnouncement != dismissedAnnouncement) {
 				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+curAnnouncement+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
@@ -437,12 +436,10 @@
 			}
 		} else {
 			var url = ocUrl("api/v0.2/ownnote/announcement");
-			alert(url);
 			$.ajax({
 				url: url,
 				success: function(data) {
 					if (data != '') {
-						alert(data.replace(/\n/g,'')+"\n"+dismissedAnnouncement);
 						if (data.replace(/\n/g,'') != dismissedAnnouncement) {
 							var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
 							$('#announcement-container').html(html);
