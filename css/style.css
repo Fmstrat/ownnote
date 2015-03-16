@@ -280,3 +280,30 @@
 .editing {
 	display: none;
 }
+
+#announcement {
+	padding: 10px;
+}
+
+#announcement h1 {
+	color: #1D2D44;
+	font-weight: bold;
+	font-style: italic;
+	font-size: 12pt;
+}
+
+#announcement a {
+	color: #1D2D44;
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+#announcement-dismiss {
+	padding: 10px;
+}
+
+#announcement-dismiss a {
+	color: #1D2D44;
+	text-decoration: underline;
+	font-weight: bold;
+}

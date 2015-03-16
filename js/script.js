@@ -1,5 +1,4 @@
 
-	
 	function tinymceInit() {
 		tinymce.init({
 			selector: "div.editable",
@@ -420,8 +419,60 @@
 			else
 				html += buildNavItem(groups[i], counts[i], false);
 		}
+		html += "<div id='announcement-container'></div>";
 		$('#grouplist').html(html);
 		bindNav();
+		if (disableAnnouncement == "")
+			loadAnnouncement();
+	}
+
+	function loadAnnouncement() {
+		var curAnnouncement = getCookie('curAnnouncement');
+		var dismissedAnnouncement = getCookie('dismissedAnnouncement');
+		if (curAnnouncement != "") {
+			if (curAnnouncement != dismissedAnnouncement) {
+				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+curAnnouncement+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
+				$('#announcement-container').html(html);
+			}
+		} else {
+			var url = ocUrl("api/v0.2/ownnote/announcement");
+			$.ajax({
+				url: url,
+				success: function(data) {
+					if (data != '') {
+						if (data.replace(/\n/g,'') != dismissedAnnouncement) {
+							var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
+							$('#announcement-container').html(html);
+						}
+						setCookie("curAnnouncement", data.replace(/\n/g,''), 7);
+					}
+				},
+				cache: false
+			});
+		}
+	}
+
+	function setCookie(cname, cvalue, exdays) {
+		var d = new Date();
+		d.setTime(d.getTime() + (exdays*24*60*60*1000));
+		var expires = "expires="+d.toUTCString();
+		document.cookie = cname + "=" + cvalue + "; " + expires;
+	}
+
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(';');
+		for(var i=0; i<ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0)==' ') c = c.substring(1);
+			if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+		}
+		return "";
+	} 
+
+	function dismissAnnouncement() {
+		setCookie("dismissedAnnouncement", $('#announcement').html().replace(/\n/g,''), 30);
+		$('#announcement-container').html('');
 	}
 
 	function selectGroup() {
@@ -506,6 +557,7 @@
 	}
 
 	$(document).ready(function() {
+		$.ajaxSetup ({ cache: false });
 		loadListing();
 	});
 	

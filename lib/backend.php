@@ -15,6 +15,26 @@ function endswith($string, $test) {
 	return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
 }
 
+function getAnnouncement() {
+	$ret = "";
+	$url = 'https://raw.githubusercontent.com/Fmstrat/announcements/master/ownnote/announcement.html';
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl1, CURLOPT_FRESH_CONNECT, TRUE);
+	//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.0; S60/3.0 NokiaN73-1/2.0(2.0617.0.0.7) Profile/MIDP-2.0 Configuration/CLDC-1.1)");
+	$result = curl_exec($ch);
+	if ($result === FALSE) {
+		die('Curl failed: ' . curl_error($ch));
+	} else {
+		$ret = $result;
+	}
+	curl_close($ch);
+	return $ret;
+}
+
 function checkEvernote($folder, $file) {
 	$html = "";
 	if ($html = \OC\Files\Filesystem::file_get_contents($folder."/".$file)) {
@@ -251,8 +271,8 @@ function deleteNote($FOLDER, $name, $group) {
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
 	$uid = \OCP\User::getUser();
-	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set deleted=1 WHERE uid=? and name=? and grouping=?");
-	$results = $query->execute(Array($uid, $name, $group));
+	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
+	$results = $query->execute(Array($mtime, $uid, $name, $group));
 	if ($FOLDER != '') {
 		$tmpfile = $FOLDER."/".$name.".htm";
 		if ($group != '')

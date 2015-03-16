@@ -21,5 +21,14 @@ $(document).ready(function() {
 		} else
 			$('#shorten-folder-settings').css('display', 'block');
 	});
+	$('#ownnote-disableannouncement').change(function() {
+		var da = "";
+		var c = $(this).is(':checked');
+		if (c)
+			da = "checked";
+	        $.post(ocOwnnoteUrl("setval"), { disableAnnouncement: da }, function (data) {
+			 console.log('response', data);
+        	});
+	});
 });
 
