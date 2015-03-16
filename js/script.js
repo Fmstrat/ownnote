@@ -440,11 +440,16 @@
 				url: url,
 				success: function(data) {
 					if (data != '') {
-						if (data.replace(/\n/g,'') != dismissedAnnouncement) {
-							var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
-							$('#announcement-container').html(html);
+						if (data.replace(/\n/g,'') != 'NONE') {
+							if (data.replace(/\n/g,'') != dismissedAnnouncement) {
+								var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
+								$('#announcement-container').html(html);
+							}
+							setCookie("curAnnouncement", data.replace(/\n/g,''), 7);
+						} else {
+							setCookie("curAnnouncement", data.replace(/\n/g,''), 7);
+							setCookie("dismissedAnnouncement", data.replace(/\n/g,''), 7);
 						}
-						setCookie("curAnnouncement", data.replace(/\n/g,''), 7);
 					}
 				},
 				cache: false
