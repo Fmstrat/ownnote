@@ -5,6 +5,12 @@
 - Add the following to your **owncloud/config/config.php**:
     - 'custom_csp_policy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; frame-src *; img-src *; font-src 'self' data:; media-src *",
 
+## Mobile Apps
+ownNote for Android in the Google Play store: http://goo.gl/pHjQY9
+
+ownNote for iOS: *In development*
+
+
 ## Importing from Evernote or other html notes
 The import process will take HTML files on your local hard drive and import the images into the notes as Base64. To import notes:
 - Export your notes from Evernote using default settings as individual *html* files
