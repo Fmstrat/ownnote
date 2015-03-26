@@ -68,15 +68,17 @@
 
 	function buildEdit(n, g, data) {
 		resizeContainer();
+		var name = htmlQuotes(n);
+		var group = htmlQuotes(g);
 		var html = "";
 		html += "<div id='controls'>";
 		html += "	<div id='newfile' class='indent'>";
 		html += "		<form id='editform' class='note-title-form'>";
-		html += "			Name: <input type='text' class='fileinput' id='editfilename' value='"+n+"'>";
+		html += "			Name: <input type='text' class='fileinput' id='editfilename' value='"+name+"'>";
 		html += "			&nbsp;&nbsp;Group: <select id='groupname'></select>";
 		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
-		html += "			<input type='hidden' id='originalfilename' value='"+n+"'>";
-		html += "			<input type='hidden' id='originalgroup' value='"+g+"'>";
+		html += "			<input type='hidden' id='originalfilename' value='"+name+"'>";
+		html += "			<input type='hidden' id='originalgroup' value='"+group+"'>";
 		html += "			<button id='save' class='button'>Save</button>";
 		html += "			<div id='canceledit' class='button'>Cancel</div>";
 		html += "		</form>";
@@ -144,6 +146,20 @@
 	var listingtype = "All";
 	var sortby = "name";
 	var sortorder = "ascending";
+
+	function htmlQuotes(value, reverse){
+		if (!reverse) {
+			var r = value;
+			r = r.replace(/\'/g, '&#39;');
+			r = r.replace(/\"/g, '&quot;');
+			return r;
+		} else {
+			var r = value;
+			r = r.replace(/&#39;/g, "'");
+			r = r.replace(/&quot;/g, '"');
+			return r;
+		}
+	}
 
 	function loadListing() {
 		var url = ocUrl("api/v0.2/ownnote");
@@ -238,19 +254,21 @@
 				if (listing[i].deleted == 0)
 					if (listingtype == "All" || listing[i].group == listingtype || (listingtype == 'Not grouped' && listing[i].group == '')) {
 						var fileclass = 'modified';
-						var file = listing[i].name;
-						if (listing[i].group != '')
-							file = "["+listing[i].group+"] "+listing[i].name;
+						var name = htmlQuotes(listing[i].name);
+						var group = htmlQuotes(listing[i].group);
+						var file = name;
+						if (group != '')
+							file = "["+group+"] "+name;
 						if (listing[i].timediff < 30)
 							fileclass = 'modified latestfile';
 						html += "<div class='listing'>";
-						html += "	<div id='"+file+"' i='"+listing[i].id+"' n='"+listing[i].name+"' g='"+listing[i].group+"' title='"+listing[i].name+"' class='file pointer'>"+listing[i].name+"</div>";
+						html += "	<div id='"+file+"' i='"+listing[i].id+"' n='"+name+"' g='"+group+"' title='"+name+"' class='file pointer'>"+name+"</div>";
 						html += "	<div class='info'>";
 						if (listing[i].timestring != '')
 							html += "		<div class='"+fileclass+"'>"+listing[i].timestring+" ago</div>";
 						else
 							html += "		<div class='"+fileclass+"'>Just now</div>";
-						html += "		<div id='"+file+"' i='"+listing[i].id+"' n='"+listing[i].name+"' g='"+listing[i].group+"' class='buttons delete delete-note pointer'><br></div>";
+						html += "		<div id='"+file+"' i='"+listing[i].id+"' n='"+name+"' g='"+group+"' class='buttons delete delete-note pointer'><br></div>";
 						html += "	</div>";
 						html += "</div>";
 					}
@@ -345,24 +363,25 @@
 	function buildNavItem(name, count, active) {
 		var html = '';
 		var a = ''
+		var n = htmlQuotes(name);
 		if (active) a = " active";
 		if (name == "All" || name == "Not grouped")
 			html += '<li class="group' + a + '" data-type="all">';
 		else {
-			html += '<li id="group-'+name+'-edit" class="group editing">';
+			html += '<li id="group-'+n+'-edit" class="group editing">';
 			html += '	<ul class="oc-addnew open" style="display: inline-block; width: auto; height: auto;" aria-disabled="false">';
 			html += '		<li>';
-			html += '			<input id="edit-'+name+'-text" class="oc-addnew-name" type="text" value="'+name+'" style="display: inline;">';
-			html += '			<button id="edit-'+name+'" class="new-button primary icon-checkmark-white" style="display: block;"></button>';
+			html += '			<input id="edit-'+n+'-text" class="oc-addnew-name" type="text" value="'+n+'" style="display: inline;">';
+			html += '			<button id="edit-'+n+'" class="new-button primary icon-checkmark-white" style="display: block;"></button>';
 			html += '		</li>';
 			html += '	</ul>';
 			html += '</li>';
-			html += '<li id="group-'+name+'" class="group' + a + '" data-type="category">';
+			html += '<li id="group-'+n+'" class="group' + a + '" data-type="category">';
 		}
-		html += '	<a class="name" id="link-'+name+'" role="button" title="'+name+'">'+name+'</a>';
+		html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+n+'</a>';
 		html += '	<span class="utils">';
-		html += '		<a class="icon-rename action edit tooltipped rightwards" group="'+name+'" original-title=""></a>';
-		html += '		<a class="icon-delete action delete tooltipped rightwards" group="'+name+'" original-title=""></a>';
+		html += '		<a class="icon-rename action edit tooltipped rightwards" group="'+n+'" original-title=""></a>';
+		html += '		<a class="icon-delete action delete tooltipped rightwards" group="'+n+'" original-title=""></a>';
 		html += '		<span class="action numnotes">'+count+'</span>';
 		html += '	</span>';
 		html += '</li>';
