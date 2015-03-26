@@ -90,9 +90,7 @@
 		html += "</div>";
 		document.getElementById("ownnote").innerHTML = html;
 		tinymceInit();
-		buildNav(g);
-		listingtype = g;
-		buildGroupSelectOptions();
+		buildGroupSelectOptions(g);
 		bindEdit();
 	}
 
@@ -166,8 +164,7 @@
 		$.get(url, function(data) {
 			filelist = data;
 			listing = jQuery.parseJSON(filelist);
-			buildNav('All');
-			listingtype = "All";
+			buildNav(listingtype);
 			buildListing();
 			if (switchgroup != "") {
 				$("[id='link-"+switchgroup+"']").click();
@@ -276,17 +273,17 @@
 		}
 		document.getElementById("ownnote").innerHTML = html;
 		$('#newfilename').css('color', '#A0A0A0');
-		buildGroupSelectOptions();
+		buildGroupSelectOptions(listingtype);
 		bindListing();
 	}
 
-	function buildGroupSelectOptions() {
+	function buildGroupSelectOptions(current) {
 		var $select = $('select#groupname');
 		$select.append($('<option value="">Not grouped</option>'));
 		$select.append($('<option>').attr('value', '_new').text('New group'));
 		$(groups).each(function(i, group) {
 			var option = $('<option>').attr('value', group).text(group);
-			if(group == listingtype) {
+			if(group == current) {
 				option.attr('selected', 'selected');
 			}
 			$select.append(option);
@@ -403,6 +400,7 @@
 
 	var groups = new Array();
 	var counts = new Array();
+
 	function buildNav(a) {
 		groups.length = 0;
 		counts.length = 0;
