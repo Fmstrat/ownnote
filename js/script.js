@@ -111,8 +111,6 @@
 	}
 
 	function saveNote(stayinnote) {
-		var origbackgroundcolor = $('#quicksave').css('background-color');
-		var origcolor =  $('#quicksave').css('color');
 		if (stayinnote) {
 			$('#quicksave').css('background-color','green');
 			$('#quicksave').css('color','white');
