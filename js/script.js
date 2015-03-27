@@ -79,7 +79,8 @@
 		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
 		html += "			<input type='hidden' id='originalfilename' value='"+name+"'>";
 		html += "			<input type='hidden' id='originalgroup' value='"+group+"'>";
-		html += "			<button id='save' class='button'>Save</button>";
+		html += "			<div id='quicksave' class='button'>Quick Save</div>";
+		html += "			<div id='save' class='button'>Save</div>";
 		html += "			<div id='canceledit' class='button'>Cancel</div>";
 		html += "		</form>";
 		html += "	</div>";
@@ -95,12 +96,27 @@
 	}
 
 	function bindEdit() {
-		$("#editform").bind("submit", saveNote);
+		$("#editform").bind("submit", function() { saveNote(false); });
+		$("#quicksave").bind("click", function() { saveNote(true); });
+		$("#save").bind("click", function() { saveNote(false); });
 		$("#canceledit").bind("click", buildListing);
 		$("#groupname").bind("change", checkNewGroup);
+		$("#editfilename").bind("change", disableQuickSave);
 	}
 
-	function saveNote() {
+	function disableQuickSave() {
+		$('#quicksave').css('background-color','white');
+		$('#quicksave').css('color','#888888');
+		$("#quicksave").off("click");
+	}
+
+	function saveNote(stayinnote) {
+		var origbackgroundcolor = $('#quicksave').css('background-color');
+		var origcolor =  $('#quicksave').css('color');
+		if (stayinnote) {
+			$('#quicksave').css('background-color','green');
+			$('#quicksave').css('color','white');
+		}
 		var editfilename = $('#editfilename').val();
 		var editgroup = $('#groupname').val();
 		var originalfilename = $('#originalfilename').val();
@@ -127,13 +143,23 @@
 				$.post(ocUrl("api/v0.2/ownnote/ren"), { name: originalfilename, group: originalgroup, newname: editfilename, newgroup: editgroup }, function (data) {
 					if (data == "DONE") {
 						$.post(ocUrl("api/v0.2/ownnote/save"), { name: editfilename, group: editgroup, content: content }, function (data) {
-							loadListing();
+							if (!stayinnote)
+								loadListing();
+							else {
+								$('#quicksave').css('background-color','rgba(240, 240, 240, 0.9)');
+								$('#quicksave').css('color','#555');
+							}
 						});
 					}
 				});
 		} else {
 			$.post(ocUrl("api/v0.2/ownnote/save"), { name: editfilename, group: editgroup, content: content }, function (data) {
-				loadListing();
+				if (!stayinnote)
+					loadListing();
+				else {
+					$('#quicksave').css('background-color','rgba(240, 240, 240, 0.9)');
+					$('#quicksave').css('color','#555');
+				}
 			});
 		}
 		return false;
@@ -309,6 +335,7 @@
 		} else {
 			$('#newgroupname').css('display','none');
 		}
+		disableQuickSave();
 	}
 
 	function newNote() {
