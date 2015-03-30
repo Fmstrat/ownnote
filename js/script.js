@@ -19,6 +19,7 @@
 			autoresize_max_height: h-130,
 			init_instance_callback : function(editor) {
 				resizeFont("13");
+				startTimer();
 			}
 		});
 	}
@@ -93,6 +94,42 @@
 		tinymceInit();
 		buildGroupSelectOptions(g);
 		bindEdit();
+	}
+
+	var idle = false;
+	var idleTime = 0;
+	var idleInterval;
+	var origNote;
+	var checkDuration = 20;
+	var saveTime = 60;
+	function startTimer() {
+		origNote = tinymce.activeEditor.getContent();
+		idleIterval = setInterval(timerIncrement, checkDuration*1000);
+		$(document).mousemove(function (e) { notIdle(); });
+		$(document).keypress(function (e) { noteIdle(); });
+		$('#editable_ifr').contents().find("body").mousemove(function (e) { notIdle(); });
+		tinymce.activeEditor.on('keyup', function(e) { notIdle(); });
+	}
+
+	function notIdle() {
+		idle = false;
+		idleTime = 0;
+	}
+
+	function timerIncrement() {
+		idleTime = idleTime + checkDuration;
+		if ($('#editable_ifr') && $('#editable_ifr').css('display') == 'block') {
+			if (!idle && idleTime >= saveTime) {
+				var content = tinymce.activeEditor.getContent();
+				if (content != origNote) {
+					origNote = content;
+					saveNote(true);
+				}
+				idle = true;
+			}
+		} else {
+			clearInterval(idleInterval);
+		}
 	}
 
 	function bindEdit() {
