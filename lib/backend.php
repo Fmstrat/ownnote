@@ -171,13 +171,13 @@ function getListing($FOLDER, $showdel) {
 								}
 					if (! $fileindb) {
 						// If it's not in the DB, add it.
-						$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note) VALUES (?,?,?,?,?)");
+						$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
 						$html = "";
 						if ($html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile)) {
 						} else {
 							$html = "";
 						}
-						$query->execute(Array($uid,$name,$group,$info['mtime'],$html));
+						$query->execute(Array($uid,$name,$group,$info['mtime'],$html,''));
 						$id = OCP\DB::insertid('*PREFIX*ownnote');
 						$requery = true;
 					}
@@ -260,8 +260,8 @@ function createNote($FOLDER, $name, $group) {
 				$mtime = $info['mtime'];
 			}
 		}
-		$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note) VALUES (?,?,?,?,?)");
-		$query->execute(Array($uid,$name,$group,$mtime,''));
+		$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
+		$query->execute(Array($uid,$name,$group,$mtime,'',''));
 	}
 	return "DONE";
 }
