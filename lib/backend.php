@@ -108,13 +108,31 @@ function getTimeString($filetime, $now) {
 
 function getListing($FOLDER, $showdel) {
 	// Get the listing from the database
+	$requery = false;
 	$uid = \OCP\User::getUser();
 	$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
 	$results = $query->execute(Array($uid))->fetchAll();
+	$results2 = $results;
+	if ($results)
+		foreach($results as $result)
+			foreach($results2 as $result2)
+				if ($result['id'] != $result2['id'] && $result['name'] == $result2['name'] && $result['grouping'] == $result2['grouping'] && $result['mtime'] == $result2['mtime']) {
+					// We have a duplicate that should not exist. Need to remove the offending record first
+					$delid = $result['id'];
+					if ($result['id'] > $result2['id'])
+						$delid = $result2['id'];
+					$delquery = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE id=?");
+					$delquery->execute(Array($delid));
+					$requery = true;
+				}
+	if ($requery) {
+		$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
+		$results = $query->execute(Array($uid))->fetchAll();
+		$requery = false;
+	}
 	// Create directory if it doesn't exist
 	$farray = array();
 	if ($FOLDER != '') {
-		$requery = false;
 		// Create the folder if it doesn't exist
 		if (!\OC\Files\Filesystem::is_dir($FOLDER)) {
 			if (!\OC\Files\Filesystem::mkdir($FOLDER)) {
@@ -298,6 +316,18 @@ function saveNote($FOLDER, $name, $group, $content) {
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
 	$uid = \OCP\User::getUser();
+	// First check to see if we're creating a new note, createNote handles all of this
+	createNote($FOLDER, $name, $group);
+	//$query = OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+	//$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+	//$indb = false;
+	//$deldb = false;
+	//foreach($results as $result) {
+		//$indb = true;
+		//if ($result['deleted'] == 1)
+			//$deldb = true;
+	//}AAA
+	// Then save
 	if ($FOLDER != '') {
 		$tmpfile = $FOLDER."/".$name.".htm";
 		if ($group != '')
@@ -315,9 +345,9 @@ function saveNote($FOLDER, $name, $group, $content) {
 function renameNote($FOLDER, $name, $group, $newname, $newgroup) {
 	// We actually need to delete and create so that the delete flag exists for syncing clients
 	$content = editNote($name, $group);
+	deleteNote($FOLDER, $name, $group);
 	createNote($FOLDER, $newname, $newgroup);
 	saveNote($FOLDER, $newname, $newgroup, $content);
-	deleteNote($FOLDER, $name, $group);
 	return "DONE";
 }
 
