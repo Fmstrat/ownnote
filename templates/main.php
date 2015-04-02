@@ -4,13 +4,8 @@
 \OCP\Util::addStyle('ownnote', 'style');
 
 $disableAnnouncement = \OCP\Config::getAppValue('ownnote', 'disableAnnouncement', '');
-
 ?>
-
 <div id="app">
-	<script>
-		var disableAnnouncement = "<?php echo $disableAnnouncement; ?>";
-	</script>
 	<div id="app-navigation">
 		<ul id="grouplist">
 		</ul>
@@ -18,4 +13,5 @@ $disableAnnouncement = \OCP\Config::getAppValue('ownnote', 'disableAnnouncement'
 	<div id="app-content">
 		<div id="ownnote"></div>
 	</div>
+	<input type=hidden value="<?php echo $disableAnnouncement; ?>">
 </div>

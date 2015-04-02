@@ -106,7 +106,7 @@
 		origNote = tinymce.activeEditor.getContent();
 		idleIterval = setInterval(timerIncrement, checkDuration*1000);
 		$(document).mousemove(function (e) { notIdle(); });
-		$(document).keypress(function (e) { noteIdle(); });
+		$(document).keypress(function (e) { notIdle(); });
 		$('#editable_ifr').contents().find("body").mousemove(function (e) { notIdle(); });
 		tinymce.activeEditor.on('keyup', function(e) { notIdle(); });
 	}
@@ -640,8 +640,14 @@
 		}
 	}
 
+	var disableAnnouncement = "";
+	function getSettings() {
+		disableAnnouncement = $('#disableAnnouncement').val();
+	}
+
 	$(document).ready(function() {
 		$.ajaxSetup ({ cache: false });
+		getSettings();
 		loadListing();
 	});
 	
