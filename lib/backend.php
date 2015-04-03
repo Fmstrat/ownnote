@@ -372,4 +372,12 @@ function renameGroup($FOLDER, $group, $newgroup) {
 	return "DONE";
 }
 
+function getVersion() {
+	$v = file_get_contents(__DIR__."/../appinfo/version");
+	if ($v)
+		return trim($v);
+	else
+		return "";
+}
+
 ?>

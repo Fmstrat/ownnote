@@ -160,6 +160,16 @@ class OwnnoteApiController extends ApiController {
 	}
 
 	/**
+	* @NoAdminRequired
+	* @CORS
+	* @NoCSRFRequired
+	*/
+	public function version() {
+		require_once 'ownnote/lib/backend.php';
+		return getVersion();
+	}
+
+	/**
 	* @CORS
 	* @NoCSRFRequired
 	*/
