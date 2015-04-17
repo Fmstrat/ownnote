@@ -204,14 +204,12 @@ function getListing($FOLDER, $showdel) {
 								}
 					if (! $fileindb) {
 						// If it's not in the DB, add it.
-						$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
 						$html = "";
 						if ($html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile)) {
 						} else {
 							$html = "";
 						}
-						$query->execute(Array($uid,$name,$group,$info['mtime'],$html,''));
-						$id = OCP\DB::insertid('*PREFIX*ownnote');
+						saveNote('', $name, $group, $html, $info['mtime']);
 						$requery = true;
 					}
 				}
@@ -236,7 +234,7 @@ function getListing($FOLDER, $showdel) {
 						}
 					if (! $filefound) {
 						$content = editNote($result['name'], $result['grouping']);
-						saveNote($FOLDER, $result['name'], $result['grouping'], $content);
+						saveNote($FOLDER, $result['name'], $result['grouping'], $content, 0);
 					}
 				}
 	}
@@ -345,10 +343,12 @@ function editNote($name, $group) {
 	return $ret;
 }
 
-function saveNote($FOLDER, $name, $group, $content) {
+function saveNote($FOLDER, $name, $group, $content, $in_mtime) {
 	$maxlength = 2621440; // 5 Megs (2 bytes per character)
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
+	if ($in_mtime != 0)
+		$mtime = $in_mtime;
 	$uid = \OCP\User::getUser();
 	// First check to see if we're creating a new note, createNote handles all of this
 	$id = createNote($FOLDER, $name, $group);
@@ -390,7 +390,7 @@ function renameNote($FOLDER, $name, $group, $newname, $newgroup) {
 	deleteNote($FOLDER, $name, $group);
 	createNote($FOLDER, $newname, $newgroup);
 	// BUG: Don't need createNote above?
-	saveNote($FOLDER, $newname, $newgroup, $content);
+	saveNote($FOLDER, $newname, $newgroup, $content, 0);
 	return "DONE";
 }
 
