@@ -145,6 +145,11 @@ function getListing($FOLDER, $showdel) {
 		$results = $query->execute(Array($uid))->fetchAll();
 		$requery = false;
 	}
+	// Tests to add a bunch of notes
+	//$now = new DateTime();
+	//for ($x = 0; $x < 199; $x++) {
+		//saveNote('', "Test ".$x, '', '', $now->getTimestamp());
+	//}
 	$farray = array();
 	if ($FOLDER != '') {
 		// Create the folder if it doesn't exist
