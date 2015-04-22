@@ -145,7 +145,6 @@ function getListing($FOLDER, $showdel) {
 		$results = $query->execute(Array($uid))->fetchAll();
 		$requery = false;
 	}
-	// Create directory if it doesn't exist
 	$farray = array();
 	if ($FOLDER != '') {
 		// Create the folder if it doesn't exist
@@ -306,7 +305,7 @@ function deleteNote($FOLDER, $name, $group) {
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
 	$uid = \OCP\User::getUser();
-	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
+	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
 	$results = $query->execute(Array($mtime, $uid, $name, $group));
 	$query = OCP\DB::prepare("SELECT id FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
 	$results = $query->execute(Array($uid, $name, $group))->fetchAll();
@@ -362,25 +361,17 @@ function saveNote($FOLDER, $name, $group, $content, $in_mtime) {
 				$mtime = $info['mtime'];
 			}
 		}
-		if (strlen($content) <= $maxlength) {
-			$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note=?, mtime=? WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($content, $mtime, $uid, $name, $group));
-			$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
-			$results = $query->execute(Array($id));
-		} else {
-			$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($mtime, $uid, $name, $group));
-			$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
-			$results = $query->execute(Array($id));
-			$contentarr = splitContent($content);
-			for ($i = 0; $i < count($contentarr); $i++) {
-				$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)");
-				$results = $query->execute(Array($id, $contentarr[$i]));
-			}
+		$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?");
+		$results = $query->execute(Array($mtime, $uid, $name, $group));
+		$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
+		$results = $query->execute(Array($id));
+		$contentarr = splitContent($content);
+		for ($i = 0; $i < count($contentarr); $i++) {
+			$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)");
+			$results = $query->execute(Array($id, $contentarr[$i]));
 		}
 
 	}
-	error_log("---RET---");
 	return "DONE";
 }
 
