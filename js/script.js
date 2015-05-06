@@ -152,6 +152,7 @@
 			$('#quicksave').css('background-color','green');
 			$('#quicksave').css('color','white');
 		}
+		$('#editfilename').val($('#editfilename').val().replace(/\\/g, '-').replace(/\//g, '-'));
 		var editfilename = $('#editfilename').val();
 		var editgroup = $('#groupname').val();
 		var originalfilename = $('#originalfilename').val();
@@ -160,6 +161,7 @@
 		if (editgroup.toLowerCase() == "all" || editgroup.toLowerCase() == "not grouped") {
 			editgroup = "";
 		} else if (editgroup == '_new') {
+			$('#newgroupname').val($('#newgroupname').val().replace(/\\/g, '-').replace(/\//g, '-'));
 			editgroup = $('#newgroupname').val();
 		}
 		if (editfilename != originalfilename || editgroup != originalgroup) {

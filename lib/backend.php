@@ -382,7 +382,9 @@ function saveNote($FOLDER, $name, $group, $content, $in_mtime) {
 	return "DONE";
 }
 
-function renameNote($FOLDER, $name, $group, $newname, $newgroup) {
+function renameNote($FOLDER, $name, $group, $in_newname, $in_newgroup) {
+	$newname = str_replace("\\", "-", str_replace("/", "-", $in_newname));
+	$newgroup = str_replace("\\", "-", str_replace("/", "-", $in_newgroup));
 	// We actually need to delete and create so that the delete flag exists for syncing clients
 	$content = editNote($name, $group);
 	deleteNote($FOLDER, $name, $group);

@@ -112,9 +112,9 @@ class OwnnoteApiController extends ApiController {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["name"]) && isset($_GET["group"]) && isset($_GET["content"]))
-			return saveNote($FOLDER, $_GET["name"], $_GET["group"], $_GET["content"]);
+			return saveNote($FOLDER, $_GET["name"], $_GET["group"], $_GET["content"], 0);
 		if (isset($_POST["name"]) && isset($_POST["group"]) && isset($_POST["content"]))
-			return saveNote($FOLDER, $_POST["name"], $_POST["group"], $_POST["content"]);
+			return saveNote($FOLDER, $_POST["name"], $_POST["group"], $_POST["content"], 0);
 	}
 
 	/**
