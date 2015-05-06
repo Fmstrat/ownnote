@@ -266,7 +266,9 @@ function getListing($FOLDER, $showdel) {
 	return $farray;
 }
 
-function createNote($FOLDER, $name, $group) {
+function createNote($FOLDER, $in_name, $in_group) {
+	$name = str_replace("\\", "-", str_replace("/", "-", $in_name));
+	$group = str_replace("\\", "-", str_replace("/", "-", $in_group));
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
 	$uid = \OCP\User::getUser();
