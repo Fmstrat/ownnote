@@ -25,7 +25,7 @@
 	}
 
 	function ocUrl(url) {
-		var newurl = OC.linkTo("ownnote",url).replace("apps/ownnote","index.php/apps/ownnote");
+		var newurl = OC.generateUrl("/apps/ownnote/") + url;
 		return newurl;
 	}
 
