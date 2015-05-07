@@ -7,4 +7,7 @@
     <author>Ben Curtis</author>
     <version>0.0.7</version>
     <requiremin>7.0.3</requiremin>
+    <dependencies>
+        <lib>curl</lib>
+    </dependencies>
 </info>
