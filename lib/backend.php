@@ -106,6 +106,21 @@ function getTimeString($filetime, $now) {
 	return $timestring;
 }
 
+function splitContent($str) {
+	$maxlength = 2621440; // 5 Megs (2 bytes per character)
+	$count = 0;
+	$strarray = array();
+	while (true) { 
+		if (strlen($str) <= $maxlength) { 
+			$strarray[$count++] = $str;
+			return $strarray;
+		} else {
+			$strarray[$count++] = substr($str, 0, $maxlength);
+			$str = substr($str, $maxlength);
+		}
+	}
+}
+
 function getListing($FOLDER, $showdel) {
 	// Get the listing from the database
 	$requery = false;
@@ -130,7 +145,11 @@ function getListing($FOLDER, $showdel) {
 		$results = $query->execute(Array($uid))->fetchAll();
 		$requery = false;
 	}
-	// Create directory if it doesn't exist
+	// Tests to add a bunch of notes
+	//$now = new DateTime();
+	//for ($x = 0; $x < 199; $x++) {
+		//saveNote('', "Test ".$x, '', '', $now->getTimestamp());
+	//}
 	$farray = array();
 	if ($FOLDER != '') {
 		// Create the folder if it doesn't exist
@@ -189,14 +208,12 @@ function getListing($FOLDER, $showdel) {
 								}
 					if (! $fileindb) {
 						// If it's not in the DB, add it.
-						$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
 						$html = "";
 						if ($html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile)) {
 						} else {
 							$html = "";
 						}
-						$query->execute(Array($uid,$name,$group,$info['mtime'],$html,''));
-						$id = OCP\DB::insertid('*PREFIX*ownnote');
+						saveNote('', $name, $group, $html, $info['mtime']);
 						$requery = true;
 					}
 				}
@@ -221,7 +238,7 @@ function getListing($FOLDER, $showdel) {
 						}
 					if (! $filefound) {
 						$content = editNote($result['name'], $result['grouping']);
-						saveNote($FOLDER, $result['name'], $result['grouping'], $content);
+						saveNote($FOLDER, $result['name'], $result['grouping'], $content, 0);
 					}
 				}
 	}
@@ -255,13 +272,16 @@ function createNote($FOLDER, $name, $group) {
 	$uid = \OCP\User::getUser();
 	$fileindb = false;
 	$filedeldb = false;
+	$ret = -1;
 	$query = OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
 	$results = $query->execute(Array($uid, $name, $group))->fetchAll();
 	foreach($results as $result)
-		if ($result['deleted'] == 0)
+		if ($result['deleted'] == 0) {
 			$fileindb = true;
-		else
+			$ret = $result['id'];
+		} else {
 			$filedeldb = true;
+		}
 	if ($filedeldb) {
 		$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
 		$results = $query->execute(Array($uid, $name, $group));
@@ -280,8 +300,9 @@ function createNote($FOLDER, $name, $group) {
 		}
 		$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
 		$query->execute(Array($uid,$name,$group,$mtime,'',''));
+		$ret = OCP\DB::insertid('*PREFIX*ownnote');
 	}
-	return "DONE";
+	return $ret;
 }
 
 
@@ -289,8 +310,14 @@ function deleteNote($FOLDER, $name, $group) {
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
 	$uid = \OCP\User::getUser();
-	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
+	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
 	$results = $query->execute(Array($mtime, $uid, $name, $group));
+	$query = OCP\DB::prepare("SELECT id FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+	$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+	foreach($results as $result) {
+		$query2 = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
+		$results2 = $query2->execute(Array($result['id']));
+	}
 	if ($FOLDER != '') {
 		$tmpfile = $FOLDER."/".$name.".htm";
 		if ($group != '')
@@ -305,40 +332,51 @@ function deleteNote($FOLDER, $name, $group) {
 function editNote($name, $group) {
 	$ret = "";
 	$uid = \OCP\User::getUser();
-	$query = OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+	$query = OCP\DB::prepare("SELECT id,note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
 	$results = $query->execute(Array($uid, $name, $group))->fetchAll();
-	foreach($results as $result)
+	foreach($results as $result) {
 		$ret = $result['note'];
+		if ($ret == '') {
+			$query2 = OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote_parts WHERE id=? order by pid");
+			$results2 = $query2->execute(Array($result['id']))->fetchAll();
+			foreach($results2 as $result2) {
+				$ret .= $result2['note'];
+			}
+		}
+	}
 	return $ret;
 }
 
-function saveNote($FOLDER, $name, $group, $content) {
+function saveNote($FOLDER, $name, $group, $content, $in_mtime) {
+	$maxlength = 2621440; // 5 Megs (2 bytes per character)
 	$now = new DateTime();
 	$mtime = $now->getTimestamp();
+	if ($in_mtime != 0)
+		$mtime = $in_mtime;
 	$uid = \OCP\User::getUser();
 	// First check to see if we're creating a new note, createNote handles all of this
-	createNote($FOLDER, $name, $group);
-	//$query = OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-	//$results = $query->execute(Array($uid, $name, $group))->fetchAll();
-	//$indb = false;
-	//$deldb = false;
-	//foreach($results as $result) {
-		//$indb = true;
-		//if ($result['deleted'] == 1)
-			//$deldb = true;
-	//}AAA
-	// Then save
-	if ($FOLDER != '') {
-		$tmpfile = $FOLDER."/".$name.".htm";
-		if ($group != '')
-			$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
-			\OC\Files\Filesystem::file_put_contents($tmpfile, $content);
-		if ($info = \OC\Files\Filesystem::getFileInfo($tmpfile)) {
-			$mtime = $info['mtime'];
+	$id = createNote($FOLDER, $name, $group);
+	if ($id != -1) {
+		if ($FOLDER != '') {
+			$tmpfile = $FOLDER."/".$name.".htm";
+			if ($group != '')
+				$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
+				\OC\Files\Filesystem::file_put_contents($tmpfile, $content);
+			if ($info = \OC\Files\Filesystem::getFileInfo($tmpfile)) {
+				$mtime = $info['mtime'];
+			}
 		}
+		$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?");
+		$results = $query->execute(Array($mtime, $uid, $name, $group));
+		$query = OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
+		$results = $query->execute(Array($id));
+		$contentarr = splitContent($content);
+		for ($i = 0; $i < count($contentarr); $i++) {
+			$query = OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)");
+			$results = $query->execute(Array($id, $contentarr[$i]));
+		}
+
 	}
-	$query = OCP\DB::prepare("UPDATE *PREFIX*ownnote set note=?, mtime=? WHERE uid=? and name=? and grouping=?");
-	$results = $query->execute(Array($content, $mtime, $uid, $name, $group));
 	return "DONE";
 }
 
@@ -347,7 +385,8 @@ function renameNote($FOLDER, $name, $group, $newname, $newgroup) {
 	$content = editNote($name, $group);
 	deleteNote($FOLDER, $name, $group);
 	createNote($FOLDER, $newname, $newgroup);
-	saveNote($FOLDER, $newname, $newgroup, $content);
+	// BUG: Don't need createNote above?
+	saveNote($FOLDER, $newname, $newgroup, $content, 0);
 	return "DONE";
 }
 
