@@ -16,6 +16,7 @@ use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\AppFramework\Http\Response;
 use \OCP\AppFramework\Http;
 use \OCP\IRequest;
+use \OCA\OwnNote\Lib\Backend;
 
 \OCP\User::checkLoggedIn();
 \OCP\App::checkAppEnabled('ownnote');
@@ -25,9 +26,11 @@ use \OCP\IRequest;
 class OwnnoteApiController extends ApiController {
 
 	private $userId;
+	private $backend;
 
 	public function __construct($appName, IRequest $request){
 		parent::__construct($appName, $request);
+		$this->backend = new Backend();
 	}
 
 	/**
@@ -37,8 +40,7 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function index() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
-		return json_encode(getListing($FOLDER, false));
+		return json_encode($this->backend->getListing($FOLDER, false));
 	}
 
 	/**
@@ -48,8 +50,7 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function remoteindex() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
-		return json_encode(getListing($FOLDER, true));
+		return json_encode($this->backend->getListing($FOLDER, true));
 	}
 
 	/**
@@ -58,8 +59,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function announcement() {
-		require_once 'ownnote/lib/backend.php';
-		return getAnnouncement();
+		return $this->backend->getAnnouncement();
 	}
 
 	/**
@@ -69,11 +69,10 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function create() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["name"]) && isset($_GET["group"]))
-			return createNote($FOLDER, $_GET["name"], $_GET["group"]);
+			return $this->backend->createNote($FOLDER, $_GET["name"], $_GET["group"]);
 		if (isset($_POST["name"]) && isset($_POST["group"]))
-			return createNote($FOLDER, $_POST["name"], $_POST["group"]);
+			return $this->backend->createNote($FOLDER, $_POST["name"], $_POST["group"]);
 	}
 
 	/**
@@ -83,11 +82,10 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function del() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["name"]) && isset($_GET["group"]))
-			return deleteNote($FOLDER, $_GET["name"], $_GET["group"]);
+			return $this->backend->deleteNote($FOLDER, $_GET["name"], $_GET["group"]);
 		if (isset($_POST["name"]) && isset($_POST["group"]))
-			return deleteNote($FOLDER, $_POST["name"], $_POST["group"]);
+			return $this->backend->deleteNote($FOLDER, $_POST["name"], $_POST["group"]);
 	}
 
 	/**
@@ -96,11 +94,10 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function edit() {
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["name"]) && isset($_GET["group"]))
-			return editNote($_GET["name"], $_GET["group"]);
+			return $this->backend->editNote($_GET["name"], $_GET["group"]);
 		if (isset($_POST["name"]) && isset($_POST["group"]))
-			return editNote($_POST["name"], $_POST["group"]);
+			return $this->backend->editNote($_POST["name"], $_POST["group"]);
 	}
 
 	/**
@@ -110,11 +107,10 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function save() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["name"]) && isset($_GET["group"]) && isset($_GET["content"]))
-			return saveNote($FOLDER, $_GET["name"], $_GET["group"], $_GET["content"], 0);
+			return $this->backend->saveNote($FOLDER, $_GET["name"], $_GET["group"], $_GET["content"], 0);
 		if (isset($_POST["name"]) && isset($_POST["group"]) && isset($_POST["content"]))
-			return saveNote($FOLDER, $_POST["name"], $_POST["group"], $_POST["content"], 0);
+			return $this->backend->saveNote($FOLDER, $_POST["name"], $_POST["group"], $_POST["content"], 0);
 	}
 
 	/**
@@ -124,11 +120,10 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function ren() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["name"]) && isset($_GET["newname"]) && isset($_GET["group"]) && isset($_GET["newgroup"]))
-			return renameNote($FOLDER, $_GET["name"], $_GET["group"], $_GET["newname"], $_GET["newgroup"]);
+			return $this->backend->renameNote($FOLDER, $_GET["name"], $_GET["group"], $_GET["newname"], $_GET["newgroup"]);
 		if (isset($_POST["name"]) && isset($_POST["newname"]) && isset($_POST["group"]) && isset($_POST["newgroup"]))
-			return renameNote($FOLDER, $_POST["name"], $_POST["group"], $_POST["newname"], $_POST["newgroup"]);
+			return $this->backend->renameNote($FOLDER, $_POST["name"], $_POST["group"], $_POST["newname"], $_POST["newgroup"]);
 	}
 
 	/**
@@ -138,11 +133,10 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function delgroup() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["group"]))
-			return deleteGroup($FOLDER, $_GET["group"]);
+			return $this->backend->deleteGroup($FOLDER, $_GET["group"]);
 		if (isset($_POST["group"]))
-			return deleteGroup($FOLDER, $_POST["group"]);
+			return $this->backend->deleteGroup($FOLDER, $_POST["group"]);
 	}
 
 	/**
@@ -152,11 +146,10 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function rengroup() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		require_once 'ownnote/lib/backend.php';
 		if (isset($_GET["group"]) && isset($_GET["newgroup"]))
-			return renameGroup($FOLDER, $_GET["group"], $_GET["newgroup"]);
+			return $this->backend->renameGroup($FOLDER, $_GET["group"], $_GET["newgroup"]);
 		if (isset($_POST["group"]) && isset($_POST["newgroup"]))
-			return renameGroup($FOLDER, $_POST["group"], $_POST["newgroup"]);
+			return $this->backend->renameGroup($FOLDER, $_POST["group"], $_POST["newgroup"]);
 	}
 
 	/**
@@ -165,8 +158,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function version() {
-		require_once 'ownnote/lib/backend.php';
-		return getVersion();
+		return $this->backend->getVersion();
 	}
 
 	/**
@@ -174,7 +166,11 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function setval() {
-		require_once 'ownnote/lib/setval.php';
-		return setAdminVal();
+		if (isset($_POST['folder'])) {
+			return $this->backend->setAdminVal('folder', $_POST["folder"]);
+		}
+		if (isset($_POST['disableAnnouncement'])) {
+			return $this->backend->setAdminVal('disableAnnouncement', $_POST["disableAnnouncement"]);
+		}
 	}
 }
