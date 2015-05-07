@@ -25,7 +25,6 @@ use \OCA\OwnNote\Lib\Backend;
 
 class OwnnoteApiController extends ApiController {
 
-	private $userId;
 	private $backend;
 
 	public function __construct($appName, IRequest $request){
