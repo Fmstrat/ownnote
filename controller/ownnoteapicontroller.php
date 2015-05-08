@@ -18,7 +18,6 @@ use \OCP\AppFramework\Http;
 use \OCP\IRequest;
 use \OCA\OwnNote\Lib\Backend;
 
-\OCP\User::checkLoggedIn();
 \OCP\App::checkAppEnabled('ownnote');
 
 
