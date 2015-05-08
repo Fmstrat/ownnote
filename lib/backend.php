@@ -6,18 +6,19 @@ namespace OCA\OwnNote\Lib;
 \OCP\App::checkAppEnabled('ownnote');
 
 use DateTime;
+use DOMDocument;
 
 class Backend {
 
 	public function startsWith($haystack, $needle) {
-		return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== FALSE;
+		return $needle === "" || strripos($haystack, $needle, -strlen($haystack)) !== FALSE;
 	}
 
-	public function endswith($string, $test) {
+	public function endsWith($string, $test) {
 		$strlen = strlen($string);
 		$testlen = strlen($test);
 		if ($testlen > $strlen) return false;
-		return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
+		return substr_compare($string, $test, $strlen - $testlen, $testlen, true) === 0;
 	}
 
 	public function getAnnouncement() {
@@ -42,10 +43,13 @@ class Backend {
 
 	public function checkEvernote($folder, $file) {
 		$html = "";
+error_log("*** 1");
 		if ($html = \OC\Files\Filesystem::file_get_contents($folder."/".$file)) {
 			$DOM = new DOMDocument;
+error_log("*** 2");
 			$DOM->loadHTML($html);
 			$items = $DOM->getElementsByTagName('meta');
+error_log("*** 3");
 			$isEvernote = false;
 			for ($i = 0; $i < $items->length; $i++) {
 				$item = $items->item($i);
@@ -53,7 +57,7 @@ class Backend {
 					$attrs = $item->attributes;
 					foreach ($attrs as $a => $attr) {
 						if ($attr->name == "name") {
-							if ($attr->value == "exporter-version") {
+							if ($attr->value == "exporter-version" || $attr->value == "Generator") {
 								$isEvernote = true;
 								continue;
 							}
@@ -61,9 +65,11 @@ class Backend {
 					}
 				}
 			}
+error_log("*** 4");
 			if ($isEvernote) {
 				$items = $DOM->getElementsByTagName('img');
 				$isEvernote = false;
+error_log("*** 5");
 				for ($i = 0; $i < $items->length; $i++) {
 					$item = $items->item($i);
 					if ($item->hasAttributes()) {
@@ -73,6 +79,7 @@ class Backend {
 								$url = $attr->value;
 								if (!$this->startsWith($url, "http") && !$this->startsWith($url, "/") && !$this->startsWith($url,"data")) {
 									if ($data = \OC\Files\Filesystem::file_get_contents($folder."/".$url)) {
+error_log("*** 6");
 										$type = pathinfo($url, PATHINFO_EXTENSION);
 										$base64 = "data:image/".$type.";base64,".base64_encode($data);
 										$html = str_replace($url, $base64, $html);
@@ -82,9 +89,13 @@ class Backend {
 						}
 					}
 				}
+error_log("*** 7");
 				\OC\Files\Filesystem::file_put_contents($folder."/".$file, $html);
+error_log("*** 8");
 			}
+error_log("*** 9");
 		}
+error_log("*** 10");
 	}
 
 	public function getTimeString($filetime, $now) {
@@ -128,6 +139,7 @@ class Backend {
 
 	public function getListing($FOLDER, $showdel) {
 		// Get the listing from the database
+error_log('Y');
 		$requery = false;
 		$uid = \OCP\User::getUser();
 		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
@@ -166,22 +178,32 @@ class Backend {
 			}
 			// Synchronize files to the database
 			$filearr = array();
+error_log('Z');
 			if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
+error_log('A');
 				if (!$listing) {
 					echo "ERROR: Error listing directory.";
 					exit;
 				}
+error_log('B');
 				while (($file = readdir($listing)) !== false) {
+error_log('C');
 					$tmpfile = $file;
 					if ($tmpfile == "." || $tmpfile == "..") continue;
-					if (!$this->endswith($tmpfile, ".htm") && !$this->endswith($tmpfile, ".html")) continue;
+					if (!$this->endsWith($tmpfile, ".htm") && !$this->endsWith($tmpfile, ".html")) continue;
+error_log('D');
 					if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$tmpfile)) {
+error_log('E');
 						// Check for EVERNOTE imports and rename them
-						if ($this->endswith($tmpfile, ".html")) {
+						if ($this->endsWith($tmpfile, ".html")) {
 							$this->checkEvernote($FOLDER, $tmpfile);
 							$tmpfile = substr($tmpfile,0,-1);
-							if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile))
+error_log('F');
+							if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile)) {
+error_log('G');
 								\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile);
+error_log('H');
+							}
 						}
 						// Separate the name and group name
 						$name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $tmpfile);
@@ -206,7 +228,10 @@ class Backend {
 											// File is newer, this could happen if a user updates a file
 											$query = \OCP\DB::prepare('UPDATE *PREFIX*ownnote set mtime=?, note=? WHERE id=?');
 											$html = "";
+error_log('H1');
+// We have an error here putting the note into the DB. Needs to go in parts
 											$html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile);
+error_log('H2');
 											$query->execute(Array($info['mtime'],$html,$result['id']));
 											$requery = true;
 										}
@@ -214,7 +239,10 @@ class Backend {
 						if (! $fileindb) {
 							// If it's not in the DB, add it.
 							$html = "";
+error_log('H3');
+// The other error occurs here. The file has been moved, but it doesn't seem to happen in time.
 							if ($html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile)) {
+error_log('H4');
 							} else {
 								$html = "";
 							}
@@ -224,6 +252,7 @@ class Backend {
 					}
 				}
 			}
+error_log('I');
 			if ($requery) {
 				$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
 				$results = $query->execute(Array($uid))->fetchAll();
@@ -268,6 +297,7 @@ class Backend {
 					$count++;
 				}
 		}
+error_log('J');
 		return $farray;
 	}
 
