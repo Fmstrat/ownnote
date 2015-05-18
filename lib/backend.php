@@ -6,18 +6,19 @@ namespace OCA\OwnNote\Lib;
 \OCP\App::checkAppEnabled('ownnote');
 
 use DateTime;
+use DOMDocument;
 
 class Backend {
 
 	public function startsWith($haystack, $needle) {
-		return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== FALSE;
+		return $needle === "" || strripos($haystack, $needle, -strlen($haystack)) !== FALSE;
 	}
 
-	public function endswith($string, $test) {
+	public function endsWith($string, $test) {
 		$strlen = strlen($string);
 		$testlen = strlen($test);
 		if ($testlen > $strlen) return false;
-		return substr_compare($string, $test, $strlen - $testlen, $testlen) === 0;
+		return substr_compare($string, $test, $strlen - $testlen, $testlen, true) === 0;
 	}
 
 	public function getAnnouncement() {
@@ -53,7 +54,7 @@ class Backend {
 					$attrs = $item->attributes;
 					foreach ($attrs as $a => $attr) {
 						if ($attr->name == "name") {
-							if ($attr->value == "exporter-version") {
+							if ($attr->value == "exporter-version" || $attr->value == "Generator") {
 								$isEvernote = true;
 								continue;
 							}
@@ -174,14 +175,12 @@ class Backend {
 				while (($file = readdir($listing)) !== false) {
 					$tmpfile = $file;
 					if ($tmpfile == "." || $tmpfile == "..") continue;
-					if (!$this->endswith($tmpfile, ".htm") && !$this->endswith($tmpfile, ".html")) continue;
+					if (!$this->endsWith($tmpfile, ".htm") && !$this->endsWith($tmpfile, ".html")) continue;
 					if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$tmpfile)) {
-						// Check for EVERNOTE imports and rename them
-						if ($this->endswith($tmpfile, ".html")) {
+						// Check for EVERNOTE but wait to rename them to get around:
+						// https://github.com/owncloud/core/issues/16202
+						if ($this->endsWith($tmpfile, ".html")) {
 							$this->checkEvernote($FOLDER, $tmpfile);
-							$tmpfile = substr($tmpfile,0,-1);
-							if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile))
-								\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile);
 						}
 						// Separate the name and group name
 						$name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $tmpfile);
@@ -204,10 +203,9 @@ class Backend {
 										// If it is in the DB, check if the filesystem file is newer than the DB
 										if ($result['mtime'] < $info['mtime']) {
 											// File is newer, this could happen if a user updates a file
-											$query = \OCP\DB::prepare('UPDATE *PREFIX*ownnote set mtime=?, note=? WHERE id=?');
 											$html = "";
 											$html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile);
-											$query->execute(Array($info['mtime'],$html,$result['id']));
+											$this->saveNote('', $result['name'], $result['grouping'], $html, $info['mtime']);
 											$requery = true;
 										}
 									}
@@ -220,6 +218,13 @@ class Backend {
 							}
 							$this->saveNote('', $name, $group, $html, $info['mtime']);
 							$requery = true;
+						}
+						// We moved the rename down here to overcome the OC issue
+						if ($this->endsWith($tmpfile, ".html")) {
+							$tmpfile = substr($tmpfile,0,-1);
+							if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile)) {
+								\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile);
+							}
 						}
 					}
 				}
