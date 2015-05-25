@@ -33,6 +33,19 @@
 		$('#editable_ifr').contents().find("head").append($("<style type='text/css'>  body{font-size:"+s+"px;}  </style>"));
 	}
 
+	var l10n = new Array();
+	function translate() {
+		var t = $('#ownnote-l10n').html();
+		eval(t);
+	}
+
+	function trans(s) {
+		if (l10n[s])
+			return l10n[s];
+		else
+			return s;
+	}
+
 	function deleteNote(id) {
 		var n = $(this).attr('n');
 		var g = $(this).attr('g');
@@ -75,14 +88,14 @@
 		html += "<div id='controls'>";
 		html += "	<div id='newfile' class='indent'>";
 		html += "		<form id='editform' class='note-title-form'>";
-		html += "			Name: <input type='text' class='fileinput' id='editfilename' value='"+name+"'>";
-		html += "			&nbsp;&nbsp;Group: <select id='groupname'></select>";
+		html += "			"+trans("Name")+": <input type='text' class='fileinput' id='editfilename' value='"+name+"'>";
+		html += "			&nbsp;&nbsp;"+trans("Group")+": <select id='groupname'></select>";
 		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
 		html += "			<input type='hidden' id='originalfilename' value='"+name+"'>";
 		html += "			<input type='hidden' id='originalgroup' value='"+group+"'>";
-		html += "			<div id='quicksave' class='button'>Quick Save</div>";
-		html += "			<div id='save' class='button'>Save</div>";
-		html += "			<div id='canceledit' class='button'>Cancel</div>";
+		html += "			<div id='quicksave' class='button'>"+trans("Quick Save")+"</div>";
+		html += "			<div id='save' class='button'>"+trans("Save")+"</div>";
+		html += "			<div id='canceledit' class='button'>"+trans("Cancel")+"</div>";
 		html += "		</form>";
 		html += "	</div>";
 		html += "</div>";
@@ -175,7 +188,7 @@
 					}
 			}
 			if (exists) {
-				alert("Filename/group already exists.");
+				alert(trans("Filename/group already exists."));
 			} else
 				$.post(ocUrl("api/v0.2/ownnote/ajaxren"), { name: originalfilename, group: originalgroup, newname: editfilename, newgroup: editgroup }, function (data) {
 					if (data == "DONE") {
@@ -249,14 +262,14 @@
 	function buildListing() {
 		var html = "";
 		html += "<div id='controls'>";
-		html += "	<div id='new' class='button indent'>New</div>";
+		html += "	<div id='new' class='button indent'>"+trans("New")+"</div>";
 		html += "	<div id='newfile' class='newfile indent'>";
 		html += "		<form id='createform' class='note-title-form'>";
 		html += "			<input type='text' class='newfileinput' id='newfilename' value='note title'>";
 		html += "			<select id='groupname'></select>";
 		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
-		html += "			<button id='create' class='button'>Create</button>";
-		html += "			<div id='cancel' class='button'>Cancel</div>";
+		html += "			<button id='create' class='button'>"+trans("Create")+"</button>";
+		html += "			<div id='cancel' class='button'>"+trans("Cancel")+"</div>";
 		html += "		</form>";
 		html += "	</div>";
 		html += "</div>";
@@ -264,46 +277,46 @@
 		var c = listing.length;
 		if (c == 0) {
 			html += "<div class='listingSort'>";
-			html += "You have no notes to display.";
+			html += trans("You have no notes to display.");
 			html += "</div>";
 		} else {
 			html += "<div class='listingSort'>";
 			if (sortby == "name" && sortorder == "ascending") {
 				html += "	<div class='filesort notesort'>";
-				html += "		<div class='pointer sorttitle' id='sortname'>Name</div>";
+				html += "		<div class='pointer sorttitle' id='sortname'>"+trans("Name")+"</div>";
 				html += "		<div class='sortarrow sortup'><!-- --></div>";
 				html += "	</div>";
 				html += "	<div class='info'>";
-				html += "		<div class='modified notesort'><span class='pointer' id='sortmod'>Modified</span></div>";
+				html += "		<div class='modified notesort'><span class='pointer' id='sortmod'>"+trans("Modified")+"</span></div>";
 				html += "	</div>";
 				listing.sort(sort_by('name', true, function(a){return a.toUpperCase()}));
 			} else if (sortby == "name" && sortorder == "descending") {
 				html += "	<div class='filesort notesort'>";
-				html += "		<div class='pointer sorttitle' id='sortname'>Name</div>";
+				html += "		<div class='pointer sorttitle' id='sortname'>"+trans("Name")+"</div>";
 				html += "		<div class='sortarrow sortdown'><!-- --></div>";
 				html += "	</div>";
 				html += "	<div class='info'>";
-				html += "		<div class='modified notesort'><span class='pointer' id='sortmod'>Modified</span></div>";
+				html += "		<div class='modified notesort'><span class='pointer' id='sortmod'>"+trans("Modified")+"</span></div>";
 				html += "	</div>";
 				listing.sort(sort_by('name', false, function(a){return a.toUpperCase()}));
 			} else if (sortby == "mod" && sortorder == "ascending") {
 				html += "	<div class='filesort notesort'>";
-				html += "		<div class='pointer sorttitle' id='sortname'>Name</div>";
+				html += "		<div class='pointer sorttitle' id='sortname'>"+trans("Name")+"</div>";
 				html += "	</div>";
 				html += "	<div class='info'>";
 				html += "		<div class='modified notesort'>";
-				html += "			<div class='pointer sorttitle' id='sortmod'>Modified</div>";
+				html += "			<div class='pointer sorttitle' id='sortmod'>"+trans("Modified")+"</div>";
 				html += "			<div class='sortarrow sortup'><!-- --></div>";
 				html += "		</div>";
 				html += "	</div>";
 				listing.sort(sort_by('mtime', false, parseInt));
 			} else if (sortby == "mod" && sortorder == "descending") {
 				html += "	<div class='filesort notesort'>";
-				html += "		<div class='pointer sorttitle' id='sortname'>Name</div>";
+				html += "		<div class='pointer sorttitle' id='sortname'>"+trans("Name")+"</div>";
 				html += "	</div>";
 				html += "	<div class='info'>";
 				html += "		<div class='modified notesort'>";
-				html += "			<div class='pointer sorttitle' id='sortmod'>Modified</div>";
+				html += "			<div class='pointer sorttitle' id='sortmod'>"+trans("Modified")+"</div>";
 				html += "			<div class='sortarrow sortdown'><!-- --></div>";
 				html += "		</div>";
 				html += "	</div>";
@@ -325,9 +338,9 @@
 						html += "	<div id='"+file+"' i='"+listing[i].id+"' n='"+name+"' g='"+group+"' title='"+name+"' class='file pointer'>"+name+"</div>";
 						html += "	<div class='info'>";
 						if (listing[i].timestring != '')
-							html += "		<div class='"+fileclass+"'>"+listing[i].timestring+" ago</div>";
+							html += "		<div class='"+fileclass+"'>"+listing[i].timestring+"</div>";
 						else
-							html += "		<div class='"+fileclass+"'>Just now</div>";
+							html += "		<div class='"+fileclass+"'>"+trans("Just now")+"</div>";
 						html += "		<div id='"+file+"' i='"+listing[i].id+"' n='"+name+"' g='"+group+"' class='buttons delete delete-note pointer'><br></div>";
 						html += "	</div>";
 						html += "</div>";
@@ -426,9 +439,10 @@
 		var a = ''
 		var n = htmlQuotes(name);
 		if (active) a = " active";
-		if (name == "All" || name == "Not grouped")
+		if (name == "All" || name == "Not grouped") {
 			html += '<li class="group' + a + '" data-type="all">';
-		else {
+			html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+htmlQuotes(trans(name))+'</a>';
+		} else {
 			html += '<li id="group-'+n+'-edit" class="group editing">';
 			html += '	<ul class="oc-addnew open" style="display: inline-block; width: auto; height: auto;" aria-disabled="false">';
 			html += '		<li>';
@@ -438,8 +452,8 @@
 			html += '	</ul>';
 			html += '</li>';
 			html += '<li id="group-'+n+'" class="group' + a + '" data-type="category">';
+			html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+n+'</a>';
 		}
-		html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+n+'</a>';
 		html += '	<span class="utils">';
 		html += '		<a class="icon-rename action edit tooltipped rightwards" group="'+n+'" original-title=""></a>';
 		html += '		<a class="icon-delete action delete tooltipped rightwards" group="'+n+'" original-title=""></a>';
@@ -512,7 +526,7 @@
 		var dismissedAnnouncement = getCookie('dismissedAnnouncement');
 		if (curAnnouncement != "") {
 			if (curAnnouncement != dismissedAnnouncement) {
-				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+curAnnouncement+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
+				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+curAnnouncement+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>"+trans("Dismiss")+"</a></div></div><div>";
 				$('#announcement-container').html(html);
 			}
 		} else {
@@ -523,7 +537,7 @@
 					if (data != '') {
 						if (data.replace(/\n/g,'') != 'NONE') {
 							if (data.replace(/\n/g,'') != dismissedAnnouncement) {
-								var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>Dismiss</a></div></div><div>";
+								var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>"+trans("Dismiss")+"</a></div></div><div>";
 								$('#announcement-container').html(html);
 							}
 							setCookie("curAnnouncement", data.replace(/\n/g,''), 7);
@@ -597,7 +611,7 @@
 								break;
 							}
 		if (exists)
-			alert('An ungrouped file has the same name as a file in this group.');
+			alert(trans("An ungrouped file has the same name as a file in this group."));
 		else
 			$.post(ocUrl("api/v0.2/ownnote/ajaxdelgroup"), { group: g }, function (data) {
 				switchgroup = "All";
@@ -628,7 +642,7 @@
 						break;
 					}
 			if (exists)
-				alert("Group already exists.");
+				alert(trans("Group already exists."));
 			else
 				$.post(ocUrl("api/v0.2/ownnote/ajaxrengroup"), { group: cg, newgroup: v }, function (data) {
 					switchgroup = v;
@@ -649,6 +663,7 @@
 
 	$(document).ready(function() {
 		$.ajaxSetup ({ cache: false });
+		translate();
 		getSettings();
 		loadListing();
 	});
