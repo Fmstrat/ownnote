@@ -307,3 +307,7 @@
 	text-decoration: underline;
 	font-weight: bold;
 }
+
+#ownnote-l10n {
+	display: none;
+}
