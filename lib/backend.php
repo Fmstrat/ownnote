@@ -137,14 +137,26 @@ class Backend {
 		if ($results)
 			foreach($results as $result)
 				foreach($results2 as $result2)
-					if ($result['id'] != $result2['id'] && $result['name'] == $result2['name'] && $result['grouping'] == $result2['grouping'] && $result['mtime'] == $result2['mtime']) {
+					if ($result['id'] != $result2['id'] && $result['name'] == $result2['name'] && $result['grouping'] == $result2['grouping']) {
 						// We have a duplicate that should not exist. Need to remove the offending record first
-						$delid = $result['id'];
-						if ($result['id'] > $result2['id'])
+						$delid = -1;
+						if ($result['mtime'] == $result2['mtime']) {
+							// If the mtime's match, delete the oldest ID.
+							$delid = $result['id'];
+							if ($result['id'] > $result2['id'])
+								$delid = $result2['id'];
+						} elseif ($result['mtime'] > $result2['mtime']) {
+							// Again, delete the oldest
 							$delid = $result2['id'];
-						$delquery = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE id=?");
-						$delquery->execute(Array($delid));
-						$requery = true;
+						} elseif ($result['mtime'] < $result2['mtime']) {
+							// The only thing left is if result is older
+							$delid = $result['id'];
+						}
+						if ($delid != -1) {
+							$delquery = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE id=?");
+							$delquery->execute(Array($delid));
+							$requery = true;
+						}
 					}
 		if ($requery) {
 			$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
