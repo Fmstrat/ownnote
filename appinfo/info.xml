@@ -5,7 +5,7 @@
     <description></description>
     <licence>AGPL</licence>
     <author>Ben Curtis</author>
-    <version>0.0.8</version>
+    <version>1.0</version>
     <requiremin>7.0.3</requiremin>
     <dependencies>
         <lib>curl</lib>
