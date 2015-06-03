@@ -215,7 +215,6 @@
 		return false;
 	}
 
-	var filelist = "";
 	var listing;
 	var listingtype = "All";
 	var sortby = "name";
@@ -238,8 +237,7 @@
 	function loadListing() {
 		var url = ocUrl("api/v0.2/ownnote/ajaxindex");
 		$.get(url, function(data) {
-			filelist = data;
-			listing = jQuery.parseJSON(filelist);
+			listing = data;
 			buildNav(listingtype);
 			buildListing();
 			if (switchgroup != "") {

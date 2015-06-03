@@ -42,7 +42,7 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function ajaxindex() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		return json_encode($this->backend->getListing($FOLDER, false));
+		return $this->backend->getListing($FOLDER, false);
 	}
 
 	/**
@@ -149,7 +149,17 @@ class OwnnoteApiController extends ApiController {
 	*/
 	public function index() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		return json_encode($this->backend->getListing($FOLDER, false));
+		return $this->backend->getListing($FOLDER, false);
+	}
+
+	/**
+	* @NoAdminRequired
+	* @CORS
+	* @NoCSRFRequired
+	*/
+	public function mobileindex() {
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		return $this->backend->getListing($FOLDER, true);
 	}
 
 	/**
