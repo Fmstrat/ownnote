@@ -71,7 +71,7 @@
 		$('#newfile').css('display','none');
 		$('#new').css('display','inline-block');
 		$('#newfilename').css('color', '#A0A0A0');
-		$('#newfilename').val('note title');
+		$('#newfilename').val(trans('Note title'));
 	}
 
 	var h = 200;
@@ -90,7 +90,7 @@
 		html += "		<form id='editform' class='note-title-form'>";
 		html += "			"+trans("Name")+": <input type='text' class='fileinput' id='editfilename' value='"+name+"'>";
 		html += "			&nbsp;&nbsp;"+trans("Group")+": <select id='groupname'></select>";
-		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
+		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='"+ trans("Group title") +"'>";
 		html += "			<input type='hidden' id='originalfilename' value='"+name+"'>";
 		html += "			<input type='hidden' id='originalgroup' value='"+group+"'>";
 		html += "			<div id='quicksave' class='button'>"+trans("Quick Save")+"</div>";
@@ -263,9 +263,9 @@
 		html += "	<div id='new' class='button indent'>"+trans("New")+"</div>";
 		html += "	<div id='newfile' class='newfile indent'>";
 		html += "		<form id='createform' class='note-title-form'>";
-		html += "			<input type='text' class='newfileinput' id='newfilename' value='note title'>";
+		html += "			<input type='text' class='newfileinput' id='newfilename' value='"+ trans("Note title") +"'>";
 		html += "			<select id='groupname'></select>";
-		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='group title'>";
+		html += "			<input type='text' class='newgroupinput' id='newgroupname' placeholder='"+ trans("Group title") +"'>";
 		html += "			<button id='create' class='button'>"+trans("Create")+"</button>";
 		html += "			<div id='cancel' class='button'>"+trans("Cancel")+"</div>";
 		html += "		</form>";
@@ -323,7 +323,7 @@
 			html += "</div>";
 			for (i = 0; i < c; i++) {
 				if (listing[i].deleted == 0)
-					if (listingtype == "All" || listing[i].group == listingtype || (listingtype == 'Not grouped' && listing[i].group == '')) {
+					if (listingtype == "All" || listing[i].group == listingtype || (listingtype == trans("Not grouped") && listing[i].group == '')) {
 						var fileclass = 'modified';
 						var name = htmlQuotes(listing[i].name);
 						var group = htmlQuotes(listing[i].group);
@@ -353,8 +353,8 @@
 
 	function buildGroupSelectOptions(current) {
 		var $select = $('select#groupname');
-		$select.append($('<option value="">Not grouped</option>'));
-		$select.append($('<option>').attr('value', '_new').text('New group'));
+		$select.append($('<option value="">'+ trans("Not grouped")+'</option>'));
+		$select.append($('<option>').attr('value', '_new').text(trans("New group")));
 		$(groups).each(function(i, group) {
 			var option = $('<option>').attr('value', group).text(group);
 			if(group == current) {
@@ -389,7 +389,7 @@
 	function newNote() {
 		$('#newfilename').css('color', '#000');
 		var v = $('#newfilename').val();
-		if (v == 'note title')
+		if (v == trans("Note title"))
 			$('#newfilename').val('');
 	}
 
@@ -437,7 +437,7 @@
 		var a = ''
 		var n = htmlQuotes(name);
 		if (active) a = " active";
-		if (name == "All" || name == "Not grouped") {
+		if (name == "All" || name == trans("Not grouped")) {
 			html += '<li class="group' + a + '" data-type="all">';
 			html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+htmlQuotes(trans(name))+'</a>';
 		} else {
@@ -501,10 +501,10 @@
 		else
 			html += buildNavItem('All', c, false);
 		if (gc > 0) {
-			if (a == "Not grouped")
-				html += buildNavItem('Not grouped', uncat, true);
+			if (a == trans("Not grouped"))
+				html += buildNavItem(trans('Not grouped'), uncat, true);
 			else
-				html += buildNavItem('Not grouped', uncat, false);
+				html += buildNavItem(trans('Not grouped'), uncat, false);
 		}
                 for (i = 0; i < gc; i++) {
 			if (a == groups[i])
