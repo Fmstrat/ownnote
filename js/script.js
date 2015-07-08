@@ -49,7 +49,7 @@
 	function deleteNote(id) {
 		var n = $(this).attr('n');
 		var g = $(this).attr('g');
-		$.post(ocUrl("api/v0.2/ownnote/ajaxdel"), { name: n, group: g }, function (data) {
+		$.post(ocUrl("ajax/v0.2/ownnote/ajaxdel"), { name: n, group: g }, function (data) {
 			loadListing();
 		});
 	}
@@ -57,7 +57,7 @@
 	function editNote(id) {
 		var n = $(this).attr('n');
 		var g = $(this).attr('g');
-		$.post(ocUrl("api/v0.2/ownnote/ajaxedit"), { name: n, group: g }, function (data) {
+		$.post(ocUrl("ajax/v0.2/ownnote/ajaxedit"), { name: n, group: g }, function (data) {
 			buildEdit(n, g, data);
 		});
 	}
@@ -190,9 +190,9 @@
 			if (exists) {
 				alert(trans("Filename/group already exists."));
 			} else
-				$.post(ocUrl("api/v0.2/ownnote/ajaxren"), { name: originalfilename, group: originalgroup, newname: editfilename, newgroup: editgroup }, function (data) {
+				$.post(ocUrl("ajax/v0.2/ownnote/ajaxren"), { name: originalfilename, group: originalgroup, newname: editfilename, newgroup: editgroup }, function (data) {
 					if (data == "DONE") {
-						$.post(ocUrl("api/v0.2/ownnote/ajaxsave"), { name: editfilename, group: editgroup, content: content }, function (data) {
+						$.post(ocUrl("ajax/v0.2/ownnote/ajaxsave"), { name: editfilename, group: editgroup, content: content }, function (data) {
 							if (!stayinnote)
 								loadListing();
 							else {
@@ -203,7 +203,7 @@
 					}
 				});
 		} else {
-			$.post(ocUrl("api/v0.2/ownnote/ajaxsave"), { name: editfilename, group: editgroup, content: content }, function (data) {
+			$.post(ocUrl("ajax/v0.2/ownnote/ajaxsave"), { name: editfilename, group: editgroup, content: content }, function (data) {
 				if (!stayinnote)
 					loadListing();
 				else {
@@ -235,7 +235,7 @@
 	}
 
 	function loadListing() {
-		var url = ocUrl("api/v0.2/ownnote/ajaxindex");
+		var url = ocUrl("ajax/v0.2/ownnote/ajaxindex");
 		$.get(url, function(data) {
 			listing = data;
 			buildNav(listingtype);
@@ -400,7 +400,7 @@
 			group = $('#newgroupname').val();
 		}
 		cancelNote();
-		$.post(ocUrl("api/v0.2/ownnote/ajaxcreate"), { name: name, group: group }, function (data) {
+		$.post(ocUrl("ajax/v0.2/ownnote/ajaxcreate"), { name: name, group: group }, function (data) {
 			loadListing();
 		});
 		return false;
@@ -528,7 +528,7 @@
 				$('#announcement-container').html(html);
 			}
 		} else {
-			var url = ocUrl("api/v0.2/ownnote/ajaxannouncement");
+			var url = ocUrl("ajax/v0.2/ownnote/ajaxannouncement");
 			$.ajax({
 				url: url,
 				success: function(data) {
@@ -611,7 +611,7 @@
 		if (exists)
 			alert(trans("An ungrouped file has the same name as a file in this group."));
 		else
-			$.post(ocUrl("api/v0.2/ownnote/ajaxdelgroup"), { group: g }, function (data) {
+			$.post(ocUrl("ajax/v0.2/ownnote/ajaxdelgroup"), { group: g }, function (data) {
 				switchgroup = "All";
 				loadListing();
 			});
@@ -642,7 +642,7 @@
 			if (exists)
 				alert(trans("Group already exists."));
 			else
-				$.post(ocUrl("api/v0.2/ownnote/ajaxrengroup"), { group: cg, newgroup: v }, function (data) {
+				$.post(ocUrl("ajax/v0.2/ownnote/ajaxrengroup"), { group: cg, newgroup: v }, function (data) {
 					switchgroup = v;
 					cg = "";
 					loadListing();

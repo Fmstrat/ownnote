@@ -22,7 +22,7 @@ use \OCA\OwnNote\Lib\Backend;
 
 
 
-class OwnnoteApiController extends ApiController {
+class OwnnoteAjaxController extends ApiController {
 
 	private $backend;
 
@@ -33,45 +33,28 @@ class OwnnoteApiController extends ApiController {
 	}
 
 	/**
-	* MOBILE FUNCTIONS
+	* AJAX FUNCTIONS
 	*/
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function index() {
+	public function ajaxindex() {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		return $this->backend->getListing($FOLDER, false);
 	}
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function mobileindex() {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		return $this->backend->getListing($FOLDER, true);
+	public function ajaxannouncement() {
+		return $this->backend->getAnnouncement();
 	}
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function remoteindex() {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
-		return json_encode($this->backend->getListing($FOLDER, true));
-	}
-
-	/**
-	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
-	*/
-	public function create($name, $group) {
+	public function ajaxcreate($name, $group) {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		if (isset($name) && isset($group))
 			return $this->backend->createNote($FOLDER, $name, $group);
@@ -79,10 +62,8 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function del($name, $group) {
+	public function ajaxdel($name, $group) {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		if (isset($name) && isset($group))
 			return $this->backend->deleteNote($FOLDER, $name, $group);
@@ -90,20 +71,16 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function edit($name, $group) {
+	public function ajaxedit($name, $group) {
 		if (isset($name) && isset($group))
 			return $this->backend->editNote($name, $group);
 	}
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function save($name, $group, $content) {
+	public function ajaxsave($name, $group, $content) {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		if (isset($name) && isset($group) && isset($content))
 			return $this->backend->saveNote($FOLDER, $name, $group, $content, 0);
@@ -111,10 +88,8 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function ren($name, $group, $newname, $newgroup) {
+	public function ajaxren($name, $group, $newname, $newgroup) {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		if (isset($name) && isset($newname) && isset($group) && isset($newgroup))
 			return $this->backend->renameNote($FOLDER, $name, $group, $newname, $newgroup);
@@ -122,10 +97,8 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function delgroup($group) {
+	public function ajaxdelgroup($group) {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		if (isset($group))
 			return $this->backend->deleteGroup($FOLDER, $group);
@@ -133,10 +106,8 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function rengroup($group, $newgroup) {
+	public function ajaxrengroup($group, $newgroup) {
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
 		if (isset($group) && isset($newgroup))
 			return $this->backend->renameGroup($FOLDER, $group, $newgroup);
@@ -144,10 +115,14 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
-	* @NoCSRFRequired
 	*/
-	public function version() {
+	public function ajaxversion() {
 		return $this->backend->getVersion();
+	}
+
+	/**
+	*/
+	public function ajaxsetval($field, $value) {
+		return $this->backend->setAdminVal($field, $value);
 	}
 }
