@@ -17,6 +17,7 @@ use \OCP\IContainer;
 
 use \OCA\OwnNote\Controller\PageController;
 use \OCA\OwnNote\Controller\OwnnoteApiController;
+use \OCA\OwnNote\Controller\OwnnoteAjaxController;
 
 
 class Application extends App {
@@ -45,6 +46,12 @@ class Application extends App {
                         );
                 });
 
+                $container->registerService('OwnnoteAjaxController', function($c){
+                        return new OwnnoteAjaxController(
+                                $c->query('AppName'),
+                                $c->query('Request')
+                        );
+                });
 
 		/**
 		 * Core
