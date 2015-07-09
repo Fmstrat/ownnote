@@ -46,6 +46,23 @@ class OwnnoteAjaxController extends ApiController {
 
 	/**
 	* @NoAdminRequired
+	* @NoCSRFRequired
+	*/
+	public function ajaximg() {
+		\OC::$server->getSession()->close();
+		if (isset($_GET['fid'])) {
+			$base64 = $this->backend->getFile($_GET['fid']);
+			$contenttype = $this->backend->getStringBetween($base64, "data:", ";base64,");
+			//header('content-type: '.$contenttype);
+			//$this->addHeader('content-type', $contenttype);
+			\OCP\Util::addHeader('content-type', $contenttype);
+			$arr = explode(';base64,', $base64);
+			echo base64_decode($arr[1]);
+		}
+	}
+
+	/**
+	* @NoAdminRequired
 	*/
 	public function ajaxannouncement() {
 		return $this->backend->getAnnouncement();
@@ -74,7 +91,7 @@ class OwnnoteAjaxController extends ApiController {
 	*/
 	public function ajaxedit($name, $group) {
 		if (isset($name) && isset($group))
-			return $this->backend->editNote($name, $group);
+			return $this->backend->editNote($name, $group, true);
 	}
 
 	/**

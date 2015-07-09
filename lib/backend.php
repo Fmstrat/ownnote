@@ -21,6 +21,15 @@ class Backend {
 		return substr_compare($string, $test, $strlen - $testlen, $testlen, true) === 0;
 	}
 
+	public function getStringBetween($string, $start, $end){
+		$string = " ".$string;
+		$ini = strpos($string,$start);
+		if ($ini == 0) return "";
+		$ini += strlen($start);
+		$len = strpos($string,$end,$ini) - $ini;
+		return substr($string,$ini,$len);
+	}
+
 	public function getAnnouncement() {
 		$ret = "";
 		$url = 'https://raw.githubusercontent.com/Fmstrat/announcements/master/ownnote/announcement.html';
@@ -354,13 +363,15 @@ class Backend {
 	}
 
 
-	public function editNote($name, $group) {
+	public function editNote($name, $group, $convert) {
 		$ret = "";
+		$id = -1;
 		$uid = \OCP\User::getUser();
 		$query = \OCP\DB::prepare("SELECT id,note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
 		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
 		foreach($results as $result) {
 			$ret = $result['note'];
+			$id = $result['id'];
 			if ($ret == '') {
 				$query2 = \OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote_parts WHERE id=? order by pid");
 				$results2 = $query2->execute(Array($result['id']))->fetchAll();
@@ -369,8 +380,69 @@ class Backend {
 				}
 			}
 		}
+		if ($convert) {
+			$ranDelete = false;
+			$DOM = new DOMDocument;
+			$DOM->loadHTML($ret);
+			$items = $DOM->getElementsByTagName('img');
+			for ($i = 0; $i < $items->length; $i++) {
+				$item = $items->item($i);
+				if ($item->hasAttributes()) {
+					$attrs = $item->attributes;
+					foreach ($attrs as $a => $attr) {
+						if ($attr->name == "src") {
+							$url = $attr->value;
+							if ($this->startsWith($url,"data:image")) {
+								if (!$ranDelete) {
+									$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_files_parts WHERE fid=(SELECT fid FROM *PREFIX*ownnote_files WHERE id=?)");
+									$results = $query->execute(Array($id));
+									$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_files WHERE id=?");
+									$results = $query->execute(Array($id));
+									$ranDelete = true;
+								}
+								$metadata = $this->getStringBetween($url, "data:", ";base64,");
+								$fid = $this->saveFile($id, "image", $url, $metadata);
+								if ($fid != -1) {
+									$repl = \OCP\Util::linkTo("ownnote", "ajax/v0.2/ownnote/ajaximg?fid=".$fid, "");
+									$repl = str_replace("/ownnote/ajax/", "/index.php/apps/ownnote/ajax/", $repl);
+									//$ret = str_replace($url, $repl, $ret);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		return $ret;
 	}
+
+	public function getFile($fid) {
+		$ret = "";
+		$uid = \OCP\User::getUser();
+		$query = \OCP\DB::prepare("SELECT filedata FROM *PREFIX*ownnote_files_parts WHERE fid=? and fid in (SELECT fid from *PREFIX*ownnote_files WHERE id in (SELECT id from *PREFIX*ownnote WHERE uid=?))");
+		$results = $query->execute(Array($fid, $uid))->fetchAll();
+		foreach($results as $result) {
+			$ret .= $result['filedata'];
+		}
+		return $ret;
+	}
+
+
+	public function saveFile($id, $filetype, $content, $metadata) {
+		$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_files (id, filetype, metadata) VALUES (?,?,?)");
+		$query->execute(Array($id,$filetype,$metadata));
+		$fid = \OCP\DB::insertid('*PREFIX*ownnote_files');
+		$maxlength = 2621440; // 5 Megs (2 bytes per character)
+		if ($fid != -1) {
+			$contentarr = $this->splitContent($content);
+			for ($i = 0; $i < count($contentarr); $i++) {
+				$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_files_parts (fid, filedata) values (?,?)");
+				$results = $query->execute(Array($fid, $contentarr[$i]));
+			}
+		}
+		return $fid;
+	}
+
 
 	public function saveNote($FOLDER, $name, $group, $content, $in_mtime) {
 		$maxlength = 2621440; // 5 Megs (2 bytes per character)

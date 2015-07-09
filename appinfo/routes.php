@@ -46,5 +46,6 @@ $application->registerRoutes($this, array('routes' => array(
 	array('name' => 'ownnote_ajax#ajaxdelgroup', 'url' => '/ajax/v0.2/ownnote/ajaxdelgroup', 'verb' => 'POST'),
 	array('name' => 'ownnote_api#rengroup', 'url' => '/api/v0.2/ownnote/rengroup', 'verb' => 'POST'),
 	array('name' => 'ownnote_ajax#ajaxrengroup', 'url' => '/ajax/v0.2/ownnote/ajaxrengroup', 'verb' => 'POST'),
+	array('name' => 'ownnote_ajax#ajaximg', 'url' => '/ajax/v0.2/ownnote/ajaximg', 'verb' => 'GET'),
         array('name' => 'ownnote_api#preflighted_cors', 'url' => '/api/v0.2/{path}', 'verb' => 'OPTIONS', 'requirements' => array('path' => '.+')),
 )));
