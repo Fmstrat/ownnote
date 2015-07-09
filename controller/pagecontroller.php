@@ -15,6 +15,7 @@ namespace OCA\OwnNote\Controller;
 use \OCP\IRequest;
 use \OCP\AppFramework\Http\TemplateResponse;
 use \OCP\AppFramework\Controller;
+use \OCP\AppFramework\Http\ContentSecurityPolicy;
 
 class PageController extends Controller {
 
@@ -37,7 +38,11 @@ class PageController extends Controller {
      * @NoCSRFRequired
      */
     public function index() {
-        $params = array('user' => $this->userId);
-        return new TemplateResponse('ownnote', 'main', $params);  // templates/main.php
+	$params = array('user' => $this->userId);
+	$csp = new \OCP\AppFramework\Http\ContentSecurityPolicy();
+	$csp->addAllowedImageDomain('data:');
+	$response = new TemplateResponse('ownnote', 'main', $params);
+	$response->setContentSecurityPolicy($csp);
+	return $response;
     }
 }
