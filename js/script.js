@@ -524,8 +524,9 @@
 		var dismissedAnnouncement = getCookie('dismissedAnnouncement');
 		if (curAnnouncement != "") {
 			if (curAnnouncement != dismissedAnnouncement) {
-				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+curAnnouncement+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>"+trans("Dismiss")+"</a></div></div><div>";
+				var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+curAnnouncement+"</div><div id='announcement-dismiss'><a id='dismissButton' href='javascript:dismissAnnouncement()'>"+trans("Dismiss")+"</a></div></div><div>";
 				$('#announcement-container').html(html);
+				$('#dismissButton').click(dismissAnnouncement);
 			}
 		} else {
 			var url = ocUrl("ajax/v0.2/ownnote/ajaxannouncement");
@@ -535,8 +536,9 @@
 					if (data != '') {
 						if (data.replace(/\n/g,'') != 'NONE') {
 							if (data.replace(/\n/g,'') != dismissedAnnouncement) {
-								var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a href='javascript:dismissAnnouncement()'>"+trans("Dismiss")+"</a></div></div><div>";
+								var html = "<div id='app-settings'><div id='app-settings-header'><div id='announcement'>"+data+"</div><div id='announcement-dismiss'><a id='dismissButton' href='javascript:dismissAnnouncement()'>"+trans("Dismiss")+"</a></div></div><div>";
 								$('#announcement-container').html(html);
+								$('#dismissButton').click(dismissAnnouncement);
 							}
 							setCookie("curAnnouncement", data.replace(/\n/g,''), 7);
 						} else {
@@ -569,6 +571,7 @@
 	} 
 
 	function dismissAnnouncement() {
+		alert('here');
 		setCookie("dismissedAnnouncement", $('#announcement').html().replace(/\n/g,''), 30);
 		$('#announcement-container').html('');
 	}

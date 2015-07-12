@@ -16,6 +16,7 @@ use \OCP\IRequest;
 use \OCP\AppFramework\Http\TemplateResponse;
 use \OCP\AppFramework\Controller;
 use \OCP\AppFramework\Http\ContentSecurityPolicy;
+use \OCP\Util;
 
 class PageController extends Controller {
 
@@ -39,10 +40,13 @@ class PageController extends Controller {
      */
     public function index() {
 	$params = array('user' => $this->userId);
-	$csp = new \OCP\AppFramework\Http\ContentSecurityPolicy();
-	$csp->addAllowedImageDomain('data:');
 	$response = new TemplateResponse('ownnote', 'main', $params);
-	$response->setContentSecurityPolicy($csp);
+	$ocVersion = \OCP\Util::getVersion();
+	if ($ocVersion[0] > 8 || ($ocVersion[0] == 8 && $ocVersion[1] >= 1)) {
+		$csp = new \OCP\AppFramework\Http\ContentSecurityPolicy();
+		$csp->addAllowedImageDomain('data:');
+		$response->setContentSecurityPolicy($csp);
+	}
 	return $response;
     }
 }

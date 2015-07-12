@@ -5,6 +5,18 @@
 
 $disableAnnouncement = \OCP\Config::getAppValue('ownnote', 'disableAnnouncement', '');
 $l = OCP\Util::getL10N('ownnote');
+
+$ocVersionArray = OCP\Util::getVersion();
+$ocVersion = "";
+$oci = 0;
+$ocl = sizeof($ocVersionArray);
+foreach ($ocVersionArray as $v) {
+	$ocVersion .= $v;
+	$oci++;
+	if ($oci < $ocl)
+		$ocVersion .= ".";
+}
+
 ?>
 <div id="app">
 	<div id="app-navigation">
@@ -14,7 +26,7 @@ $l = OCP\Util::getL10N('ownnote');
 	<div id="app-content">
 		<div id="ownnote"></div>
 	</div>
-	<input type=hidden value="<?php echo $disableAnnouncement; ?>">
+	<input type=hidden name="disableAnnouncement" id="disableAnnouncement" value="<?php echo $disableAnnouncement; ?>">
 	<div id="ownnote-l10n">
 		l10n["# day ago"] = "<?php p($l->t("# day ago")); ?>";
 		l10n["# days ago"] = "<?php p($l->t("# days ago")); ?>";
