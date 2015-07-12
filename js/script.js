@@ -571,7 +571,6 @@
 	} 
 
 	function dismissAnnouncement() {
-		alert('here');
 		setCookie("dismissedAnnouncement", $('#announcement').html().replace(/\n/g,''), 30);
 		$('#announcement-container').html('');
 	}
