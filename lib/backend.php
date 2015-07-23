@@ -27,7 +27,7 @@ class Backend {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($curl1, CURLOPT_FRESH_CONNECT, TRUE);
+		curl_setopt($ch, CURLOPT_FRESH_CONNECT, TRUE);
 		//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.0; S60/3.0 NokiaN73-1/2.0(2.0617.0.0.7) Profile/MIDP-2.0 Configuration/CLDC-1.1)");
