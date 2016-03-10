@@ -14,12 +14,12 @@ $(document).ready(function() {
 		var val = $(this).val();
 		if (val == "") {
 			$('#ownnote-folder').val('');
-			$('#shorten-folder-settings').css('display', 'none');
+			$('#ownnote-folder-settings').css('display', 'none');
 			$.post(ocOwnnoteUrl("api/v0.2/ajaxsetval"), { field: 'folder', value: '' }, function (data) {
 				console.log('response', data);
 			});
 		} else
-			$('#shorten-folder-settings').css('display', 'block');
+			$('#ownnote-folder-settings').css('display', 'block');
 	});
 	$('#ownnote-disableannouncement').change(function() {
 		var da = "";

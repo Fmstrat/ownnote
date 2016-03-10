@@ -16,7 +16,7 @@ $l = OCP\Util::getL10N('ownnote');
 		<option <?php if ($folder != "") echo "selected"; ?> value="folder"><?php p($l->t("Database and folder")); ?></option>
 	</select><br>
 	<br>
-	<div id="shorten-folder-settings" style="display: <?php if ($folder != "") echo "block"; else echo "none"; ?>">
+	<div id="ownnote-folder-settings" style="display: <?php if ($folder != "") echo "block"; else echo "none"; ?>">
 		<label for="ownnote-folder"><?php p($l->t("Please enter the folder name you would like to use to store notes, with no slashes.")); ?></label><br>
 		<input type="text" style="width: 250pt" name="ownnote-folder" id="ownnote-folder" value="<?php p($folder) ?>" /><br>
 		<br>
