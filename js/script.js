@@ -65,6 +65,7 @@
 	function addNote() {
 		$('#newfile').css('display','inline-block');
 		$('#new').css('display','none');
+                $('#newfilename').focus();
 	}
 
 	function cancelNote() {
@@ -380,6 +381,7 @@
 		var selectVal = $('select#groupname').val();
 		if(selectVal == '_new') {
 			$('#newgroupname').css('display','inline-block');
+                        $('#newgroupname').focus();
 		} else {
 			$('#newgroupname').css('display','none');
 		}
