@@ -42,7 +42,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function index() {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		return $this->backend->getListing($FOLDER, false);
 	}
 
@@ -52,7 +52,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function mobileindex() {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		return $this->backend->getListing($FOLDER, true);
 	}
 
@@ -62,7 +62,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function remoteindex() {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		return json_encode($this->backend->getListing($FOLDER, true));
 	}
 
@@ -72,7 +72,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function create($name, $group) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
 			return $this->backend->createNote($FOLDER, $name, $group);
 	}
@@ -83,7 +83,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function del($name, $group) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
 			return $this->backend->deleteNote($FOLDER, $name, $group);
 	}
@@ -104,7 +104,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function save($name, $group, $content) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group) && isset($content))
 			return $this->backend->saveNote($FOLDER, $name, $group, $content, 0);
 	}
@@ -115,7 +115,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function ren($name, $group, $newname, $newgroup) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($newname) && isset($group) && isset($newgroup))
 			return $this->backend->renameNote($FOLDER, $name, $group, $newname, $newgroup);
 	}
@@ -126,7 +126,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function delgroup($group) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($group))
 			return $this->backend->deleteGroup($FOLDER, $group);
 	}
@@ -137,7 +137,7 @@ class OwnnoteApiController extends ApiController {
 	* @NoCSRFRequired
 	*/
 	public function rengroup($group, $newgroup) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', 'Notes');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($group) && isset($newgroup))
 			return $this->backend->renameGroup($FOLDER, $group, $newgroup);
 	}
