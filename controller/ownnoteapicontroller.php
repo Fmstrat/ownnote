@@ -38,7 +38,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function index() {
@@ -48,7 +47,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function mobileindex() {
@@ -58,7 +56,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function remoteindex() {
@@ -68,7 +65,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function create($name, $group) {
@@ -79,7 +75,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function del($name, $group) {
@@ -90,7 +85,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function edit($name, $group) {
@@ -100,7 +94,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function save($name, $group, $content) {
@@ -111,7 +104,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function ren($name, $group, $newname, $newgroup) {
@@ -122,7 +114,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function delgroup($group) {
@@ -133,7 +124,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function rengroup($group, $newgroup) {
@@ -144,7 +134,6 @@ class OwnnoteApiController extends ApiController {
 
 	/**
 	* @NoAdminRequired
-	* @CORS
 	* @NoCSRFRequired
 	*/
 	public function version() {
