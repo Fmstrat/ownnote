@@ -6,7 +6,7 @@ function ocOwnnoteUrl(url) {
 $(document).ready(function() {
 	$('#ownnote-folder').change(function() {
 		var val = $(this).val();
-	        $.post(ocOwnnoteUrl("api/v0.2/ajaxsetval"), { field: 'folder', value: val }, function (data) {
+	        $.post(ocOwnnoteUrl("ajax/v0.2/ajaxsetval"), { field: 'folder', value: val }, function (data) {
 			 console.log('response', data);
         	});
 	});
@@ -15,7 +15,7 @@ $(document).ready(function() {
 		if (val == "") {
 			$('#ownnote-folder').val('');
 			$('#ownnote-folder-settings').css('display', 'none');
-			$.post(ocOwnnoteUrl("api/v0.2/ajaxsetval"), { field: 'folder', value: '' }, function (data) {
+			$.post(ocOwnnoteUrl("ajax/v0.2/ajaxsetval"), { field: 'folder', value: '' }, function (data) {
 				console.log('response', data);
 			});
 		} else
@@ -26,7 +26,7 @@ $(document).ready(function() {
 		var c = $(this).is(':checked');
 		if (c)
 			da = "checked";
-	        $.post(ocOwnnoteUrl("api/v0.2/ajaxsetval"), { field: 'disableAnnouncement', val: da }, function (data) {
+	        $.post(ocOwnnoteUrl("ajax/v0.2/ajaxsetval"), { field: 'disableAnnouncement', val: da }, function (data) {
 			 console.log('response', data);
         	});
 	});
