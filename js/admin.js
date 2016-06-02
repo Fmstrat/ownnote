@@ -26,7 +26,7 @@ $(document).ready(function() {
 		var c = $(this).is(':checked');
 		if (c)
 			da = "checked";
-	        $.post(ocOwnnoteUrl(), { field: 'disableAnnouncement', val: da }, function (data) {
+	        $.post(ocOwnnoteUrl(), { field: 'disableAnnouncement', value: da }, function (data) {
 			 console.log('response', data);
         	});
 	});
