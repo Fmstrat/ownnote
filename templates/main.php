@@ -49,12 +49,15 @@ foreach ($ocVersionArray as $v) {
 		l10n["Dismiss"] = "<?php p($l->t("Dismiss")); ?>";
 		l10n["Filename/group already exists."] = "<?php p($l->t("Filename/group already exists.")); ?>";
 		l10n["Group"] = "<?php p($l->t("Group")); ?>";
+		l10n["Group title"] = "<?php p($l->t("Group title")); ?>";
 		l10n["Group already exists."] = "<?php p($l->t("Group already exists.")); ?>";
 		l10n["Just now"] = "<?php p($l->t("Just now")); ?>";
 		l10n["Modified"] = "<?php p($l->t("Modified")); ?>";
 		l10n["Name"] = "<?php p($l->t("Name")); ?>";
 		l10n["New"] = "<?php p($l->t("New")); ?>";
+		l10n["New group"] = "<?php p($l->t("New group")); ?>";
 		l10n["Not grouped"] = "<?php p($l->t("Not grouped")); ?>";
+		l10n["Note title"] = "<?php p($l->t("Note title")); ?>";
 		l10n["Note"] = "<?php p($l->t("Note")); ?>";
 		l10n["Notes"] = "<?php p($l->t("Notes")); ?>";
 		l10n["Quick Save"] = "<?php p($l->t("Quick Save")); ?>";
