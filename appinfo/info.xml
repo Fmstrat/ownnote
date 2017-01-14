@@ -10,5 +10,6 @@
     <dependencies>
         <lib>curl</lib>
         <owncloud min-version="7.0.3" max-version="9.1" />
+        <nextcloud min-version="9" max-version="11"/>
     </dependencies>
 </info>
