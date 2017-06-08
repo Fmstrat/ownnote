@@ -4,15 +4,29 @@
 			selector: "div.editable",
 			menubar: false,
 			plugins: [
-				"advlist autolink lists link charmap print preview anchor",
+				"codesample wordcount visualchars textcolor advlist autolink lists link charmap print preview anchor",
 				"searchreplace visualblocks code fullscreen",
 				"insertdatetime media table contextmenu bdesk_photo autoresize"
 			],
+			codesample_languages: [
+				{text: 'HTML/XML', value: 'markup'},
+				{text: 'JavaScript', value: 'javascript'},
+				{text: 'CSS', value: 'css'},
+				{text: 'PHP', value: 'php'},
+				{text: 'Java', value: 'java'},
+				{text: 'C', value: 'c'},
+				{text: 'C#', value: 'csharp'},
+				{text: 'C++', value: 'cpp'}
+			],
 			extended_valid_elements: "form[name|id|action|method|enctype|accept-charset|onsubmit|onreset|target],input[id|name|type|value|size|maxlength|checked|accept|src|width|height|disabled|readonly|tabindex|accesskey|onfocus|onblur|onchange|onselect|onclick|onkeyup|onkeydown|required|style],textarea[id|name|rows|cols|maxlength|disabled|readonly|tabindex|accesskey|onfocus|onblur|onchange|onselect|onclick|onkeyup|onkeydown|required|style],option[name|id|value|selected|style],select[id|name|type|value|size|maxlength|checked|width|height|disabled|readonly|tabindex|accesskey|onfocus|onblur|onchange|onselect|onclick|multiple|style]",
-			toolbar: "insertfile undo redo | styleselect | bold italic strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link bdesk_photo",
+			toolbar: "searchreplace | insertfile undo redo | styleselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table | forecolor backcolor | link bdesk_photo codesample | visualchars visualblocks code",
 			allow_html_data_urls: true,
 			allow_script_urls: true,
 			paste_data_images: true,
+			images_upload_handler: function (blobInfo, success, failure) {
+			  // no upload, just return the blobInfo.blob() as base64 data
+			  success("data:" + blobInfo.blob().type + ";base64," + blobInfo.base64());
+			},
 			width: '100%',
   			height: h-130,
 			autoresize_min_height: h-130,

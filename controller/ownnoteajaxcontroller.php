@@ -40,8 +40,9 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxindex() {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
-		return $this->backend->getListing($FOLDER, false);
+		return $this->backend->getListing($DB_OR_FOLDER, $FOLDER, false);
 	}
 
 	/**
@@ -55,62 +56,70 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxcreate($name, $group) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
-			return $this->backend->createNote($FOLDER, $name, $group);
+			return $this->backend->createNote($DB_OR_FOLDER, $FOLDER, $name, $group);
 	}
 
 	/**
 	* @NoAdminRequired
 	*/
 	public function ajaxdel($name, $group) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
-			return $this->backend->deleteNote($FOLDER, $name, $group);
+			return $this->backend->deleteNote($DB_OR_FOLDER, $FOLDER, $name, $group);
 	}
 
 	/**
 	* @NoAdminRequired
 	*/
 	public function ajaxedit($name, $group) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
+		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
-			return $this->backend->editNote($name, $group);
+			return $this->backend->editNote($DB_OR_FOLDER, $FOLDER, $name, $group);
 	}
 
 	/**
 	* @NoAdminRequired
 	*/
 	public function ajaxsave($name, $group, $content) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group) && isset($content))
-			return $this->backend->saveNote($FOLDER, $name, $group, $content, 0);
+			return $this->backend->saveNote($DB_OR_FOLDER, $FOLDER, $name, $group, $content, 0);
 	}
 
 	/**
 	* @NoAdminRequired
 	*/
 	public function ajaxren($name, $group, $newname, $newgroup) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($newname) && isset($group) && isset($newgroup))
-			return $this->backend->renameNote($FOLDER, $name, $group, $newname, $newgroup);
+			return $this->backend->renameNote($DB_OR_FOLDER, $FOLDER, $name, $group, $newname, $newgroup);
 	}
 
 	/**
 	* @NoAdminRequired
 	*/
 	public function ajaxdelgroup($group) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($group))
-			return $this->backend->deleteGroup($FOLDER, $group);
+			return $this->backend->deleteGroup($DB_OR_FOLDER, $FOLDER, $group);
 	}
 
 	/**
 	* @NoAdminRequired
 	*/
 	public function ajaxrengroup($group, $newgroup) {
+		$DB_OR_FOLDER = \OCP\Config::getAppValue('ownnote', 'db_or_folder', 'folder_only');
 		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
 		if (isset($group) && isset($newgroup))
-			return $this->backend->renameGroup($FOLDER, $group, $newgroup);
+			return $this->backend->renameGroup($DB_OR_FOLDER, $FOLDER, $group, $newgroup);
 	}
 
 	/**

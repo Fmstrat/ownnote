@@ -9,6 +9,32 @@ use DateTime;
 use DOMDocument;
 
 class Backend {
+	
+	const DB_ONLY = 'db_only';
+	const DB_OR_FOLDER = 'db_or_folder';
+	const FOLDER_ONLY = 'folder_only';
+	
+	private function useDatabase($DB_OR_FOLDER, $FOLDER) {
+		// easy, independent of folder content
+		return ($DB_OR_FOLDER != Backend::FOLDER_ONLY);
+	}
+
+	private function useFolder($DB_OR_FOLDER, $FOLDER) {
+		// only true if also a folder is really given
+		return ($DB_OR_FOLDER != Backend::DB_ONLY && $FOLDER != '');
+	}
+	
+	private function getGroupAndNameForFile($filename) {
+		$name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $filename);
+		$group = "";
+		if (substr($name,0,1) == "[") {
+			$end = strpos($name, ']');
+			$group = substr($name, 1, $end-1);	
+			$name = substr($name, $end+1, strlen($name)-$end+1);
+			$name = trim($name);
+		}
+		return array ($group, $name);
+	}
 
 	public function startsWith($haystack, $needle) {
 		return $needle === "" || strripos($haystack, $needle, -strlen($haystack)) !== FALSE;
@@ -127,58 +153,143 @@ class Backend {
 		}
 	}
 
-	public function getListing($FOLDER, $showdel) {
-		// Get the listing from the database
-		$requery = false;
-		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
-		$results = $query->execute(Array($uid))->fetchAll();
-		$results2 = $results;
-		if ($results)
-			foreach($results as $result)
-				foreach($results2 as $result2)
-					if ($result['id'] != $result2['id'] && $result['name'] == $result2['name'] && $result['grouping'] == $result2['grouping']) {
-						// We have a duplicate that should not exist. Need to remove the offending record first
-						$delid = -1;
-						if ($result['mtime'] == $result2['mtime']) {
-							// If the mtime's match, delete the oldest ID.
-							$delid = $result['id'];
-							if ($result['id'] > $result2['id'])
-								$delid = $result2['id'];
-						} elseif ($result['mtime'] > $result2['mtime']) {
-							// Again, delete the oldest
-							$delid = $result2['id'];
-						} elseif ($result['mtime'] < $result2['mtime']) {
-							// The only thing left is if result is older
-							$delid = $result['id'];
-						}
-						if ($delid != -1) {
-							$delquery = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE id=?");
-							$delquery->execute(Array($delid));
-							$requery = true;
-						}
-					}
-		if ($requery) {
+	public function getListing($DB_OR_FOLDER, $FOLDER, $showdel) {
+		// init return parameters
+		$results = array();
+		$farray = array();
+		
+		if ($this->useDatabase($DB_OR_FOLDER, $FOLDER)) {
+			// Get the listing from the database
+			$requery = false;
+			$uid = \OCP\User::getUser();
 			$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
 			$results = $query->execute(Array($uid))->fetchAll();
-			$requery = false;
-		}
-		// Tests to add a bunch of notes
-		//$now = new DateTime();
-		//for ($x = 0; $x < 199; $x++) {
-			//saveNote('', "Test ".$x, '', '', $now->getTimestamp());
-		//}
-		$farray = array();
-		if ($FOLDER != '') {
-			// Create the folder if it doesn't exist
-			if (!\OC\Files\Filesystem::is_dir($FOLDER)) {
-				if (!\OC\Files\Filesystem::mkdir($FOLDER)) {
-					echo "ERROR: Could not create ownNote directory.";
-					exit;
-				}
+			$results2 = $results;
+			if ($results)
+				foreach($results as $result)
+					foreach($results2 as $result2)
+						if ($result['id'] != $result2['id'] && $result['name'] == $result2['name'] && $result['grouping'] == $result2['grouping']) {
+							// We have a duplicate that should not exist. Need to remove the offending record first
+							$delid = -1;
+							if ($result['mtime'] == $result2['mtime']) {
+								// If the mtime's match, delete the oldest ID.
+								$delid = $result['id'];
+								if ($result['id'] > $result2['id'])
+									$delid = $result2['id'];
+							} elseif ($result['mtime'] > $result2['mtime']) {
+								// Again, delete the oldest
+								$delid = $result2['id'];
+							} elseif ($result['mtime'] < $result2['mtime']) {
+								// The only thing left is if result is older
+								$delid = $result['id'];
+							}
+							if ($delid != -1) {
+								$delquery = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE id=?");
+								$delquery->execute(Array($delid));
+								$requery = true;
+							}
+						}
+			if ($requery) {
+				$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
+				$results = $query->execute(Array($uid))->fetchAll();
+				$requery = false;
 			}
-			// Synchronize files to the database
-			$filearr = array();
+			// Tests to add a bunch of notes
+			//$now = new DateTime();
+			//for ($x = 0; $x < 199; $x++) {
+				//saveNote('', "Test ".$x, '', '', $now->getTimestamp());
+			//}
+			if ($FOLDER != '') {
+				// Create the folder if it doesn't exist
+				if (!\OC\Files\Filesystem::is_dir($FOLDER)) {
+					if (!\OC\Files\Filesystem::mkdir($FOLDER)) {
+						echo "ERROR: Could not create ownNote directory.";
+						exit;
+					}
+				}
+				// Synchronize files to the database
+				$filearr = array();
+				if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
+					if (!$listing) {
+						echo "ERROR: Error listing directory.";
+						exit;
+					}
+					while (($file = readdir($listing)) !== false) {
+						$tmpfile = $file;
+						if ($tmpfile == "." || $tmpfile == "..") continue;
+						if (!$this->endsWith($tmpfile, ".htm") && !$this->endsWith($tmpfile, ".html")) continue;
+						if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$tmpfile)) {
+							// Check for EVERNOTE but wait to rename them to get around:
+							// https://github.com/owncloud/core/issues/16202
+							if ($this->endsWith($tmpfile, ".html")) {
+								$this->checkEvernote($FOLDER, $tmpfile);
+							}
+							// Separate the name and group name
+							list ($group, $name) = $this->getGroupAndNameForFile($tmpfile);
+							// Set array for later checking
+							$filearr[] = $tmpfile;
+							// Check to see if the file is in the DB
+							$fileindb = false;
+							if ($results)
+								foreach($results as $result)
+									if ($result['deleted'] == 0)
+										if ($name == $result['name'] && $group == $result['grouping']) {
+											$fileindb = true;
+											// If it is in the DB, check if the filesystem file is newer than the DB
+											if ($result['mtime'] < $info['mtime']) {
+												// File is newer, this could happen if a user updates a file
+												$html = "";
+												$html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile);
+												$this->saveNote($DB_OR_FOLDER, '', $result['name'], $result['grouping'], $html, $info['mtime']);
+												$requery = true;
+											}
+										}
+							if (! $fileindb) {
+								// If it's not in the DB, add it.
+								$html = "";
+								if ($html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile)) {
+								} else {
+									$html = "";
+								}
+								$this->saveNote($DB_OR_FOLDER, '', $name, $group, $html, $info['mtime']);
+								$requery = true;
+							}
+							// We moved the rename down here to overcome the OC issue
+							if ($this->endsWith($tmpfile, ".html")) {
+								$tmpfile = substr($tmpfile,0,-1);
+								if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile)) {
+									\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile);
+								}
+							}
+						}
+					}
+				}
+				if ($requery) {
+					$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
+					$results = $query->execute(Array($uid))->fetchAll();
+				}
+				// Now also make sure the files exist, they may not if the user switched folders in admin.
+				if ($results)
+					foreach($results as $result)
+						if ($result['deleted'] == 0) {
+							$tmpfile = $result['name'].".htm";
+							if ($result['grouping'] != '')
+								$tmpfile = '['.$result['grouping'].'] '.$result['name'].'.htm';
+							$filefound = false;
+							foreach ($filearr as $f)
+								if ($f == $tmpfile) {
+									$filefound = true;
+									break;
+								}
+							if (! $filefound) {
+								$content = $this->editNote($DB_OR_FOLDER, $FOLDER, $result['name'], $result['grouping']);
+								$this->saveNote($DB_OR_FOLDER, $FOLDER, $result['name'], $result['grouping'], $content, 0);
+							}
+						}
+			}
+		} else {
+			// build array from file list
+			$count = 0;
 			if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
 				if (!$listing) {
 					echo "ERROR: Error listing directory.";
@@ -187,82 +298,23 @@ class Backend {
 				while (($file = readdir($listing)) !== false) {
 					$tmpfile = $file;
 					if ($tmpfile == "." || $tmpfile == "..") continue;
-					if (!$this->endsWith($tmpfile, ".htm") && !$this->endsWith($tmpfile, ".html")) continue;
+					if (!$this->endsWith($tmpfile, ".htm")) continue;
 					if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$tmpfile)) {
-						// Check for EVERNOTE but wait to rename them to get around:
-						// https://github.com/owncloud/core/issues/16202
-						if ($this->endsWith($tmpfile, ".html")) {
-							$this->checkEvernote($FOLDER, $tmpfile);
-						}
 						// Separate the name and group name
-						$name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $tmpfile);
-						$group = "";
-						if (substr($name,0,1) == "[") {
-							$end = strpos($name, ']');
-							$group = substr($name, 1, $end-1);	
-							$name = substr($name, $end+1, strlen($name)-$end+1);
-							$name = trim($name);
-						}
-						// Set array for later checking
-						$filearr[] = $tmpfile;
-						// Check to see if the file is in the DB
-						$fileindb = false;
-						if ($results)
-							foreach($results as $result)
-								if ($result['deleted'] == 0)
-									if ($name == $result['name'] && $group == $result['grouping']) {
-										$fileindb = true;
-										// If it is in the DB, check if the filesystem file is newer than the DB
-										if ($result['mtime'] < $info['mtime']) {
-											// File is newer, this could happen if a user updates a file
-											$html = "";
-											$html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile);
-											$this->saveNote('', $result['name'], $result['grouping'], $html, $info['mtime']);
-											$requery = true;
-										}
-									}
-						if (! $fileindb) {
-							// If it's not in the DB, add it.
-							$html = "";
-							if ($html = \OC\Files\Filesystem::file_get_contents($FOLDER."/".$tmpfile)) {
-							} else {
-								$html = "";
-							}
-							$this->saveNote('', $name, $group, $html, $info['mtime']);
-							$requery = true;
-						}
-						// We moved the rename down here to overcome the OC issue
-						if ($this->endsWith($tmpfile, ".html")) {
-							$tmpfile = substr($tmpfile,0,-1);
-							if (!\OC\Files\Filesystem::file_exists($FOLDER."/".$tmpfile)) {
-								\OC\Files\Filesystem::rename($FOLDER."/".$file, $FOLDER."/".$tmpfile);
-							}
-						}
+						list ($fgroup, $fname) = $this->getGroupAndNameForFile($tmpfile);
+
+						// populate result array as for database
+						$result = array();
+						$result['id'] = $count;
+						$result['name'] = $fname;
+						$result['grouping'] = $fgroup;
+						$result['mtime'] = $info['mtime'];
+						$result['deleted'] = 0;
+						$results[$count] = $result;
+						$count++;
 					}
 				}
 			}
-			if ($requery) {
-				$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
-				$results = $query->execute(Array($uid))->fetchAll();
-			}
-			// Now also make sure the files exist, they may not if the user switched folders in admin.
-			if ($results)
-				foreach($results as $result)
-					if ($result['deleted'] == 0) {
-						$tmpfile = $result['name'].".htm";
-						if ($result['grouping'] != '')
-							$tmpfile = '['.$result['grouping'].'] '.$result['name'].'.htm';
-						$filefound = false;
-						foreach ($filearr as $f)
-							if ($f == $tmpfile) {
-								$filefound = true;
-								break;
-							}
-						if (! $filefound) {
-							$content = $this->editNote($result['name'], $result['grouping']);
-							$this->saveNote($FOLDER, $result['name'], $result['grouping'], $content, 0);
-						}
-					}
 		}
 		// Now loop through and return the listing
 		if ($results) {
@@ -289,61 +341,74 @@ class Backend {
 		return $farray;
 	}
 
-	public function createNote($FOLDER, $in_name, $in_group) {
+	public function createNote($DB_OR_FOLDER, $FOLDER, $in_name, $in_group) {
 		$name = str_replace("\\", "-", str_replace("/", "-", $in_name));
 		$group = str_replace("\\", "-", str_replace("/", "-", $in_group));
-		$now = new DateTime();
-		$mtime = $now->getTimestamp();
-		$uid = \OCP\User::getUser();
-		$fileindb = false;
-		$filedeldb = false;
-		$ret = -1;
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
-		foreach($results as $result)
-			if ($result['deleted'] == 0) {
-				$fileindb = true;
-				$ret = $result['id'];
-			} else {
-				$filedeldb = true;
-			}
-		if ($filedeldb) {
-			$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($uid, $name, $group));
-		}
-		if (! $fileindb) {
-			if ($FOLDER != '') {
-				$tmpfile = $FOLDER."/".$name.".htm";
-				if ($group != '')
-					$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
-				if (!\OC\Files\Filesystem::file_exists($tmpfile)) {
-					\OC\Files\Filesystem::touch($tmpfile);
+
+		if ($this->useDatabase($DB_OR_FOLDER, $FOLDER)) {
+			$now = new DateTime();
+			$mtime = $now->getTimestamp();
+			$uid = \OCP\User::getUser();
+			$fileindb = false;
+			$filedeldb = false;
+			$ret = -1;
+			$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+			$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+			foreach($results as $result)
+				if ($result['deleted'] == 0) {
+					$fileindb = true;
+					$ret = $result['id'];
+				} else {
+					$filedeldb = true;
 				}
-				if ($info = \OC\Files\Filesystem::getFileInfo($tmpfile)) {
-					$mtime = $info['mtime'];
-				}
+			if ($filedeldb) {
+				$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+				$results = $query->execute(Array($uid, $name, $group));
 			}
-			$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
-			$query->execute(Array($uid,$name,$group,$mtime,'',''));
-			$ret = \OCP\DB::insertid('*PREFIX*ownnote');
+			if (! $fileindb) {
+				if ($this->useFolder($DB_OR_FOLDER, $FOLDER)) {
+					$tmpfile = $FOLDER."/".$name.".htm";
+					if ($group != '')
+						$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
+					if (!\OC\Files\Filesystem::file_exists($tmpfile)) {
+						\OC\Files\Filesystem::touch($tmpfile);
+					}
+					if ($info = \OC\Files\Filesystem::getFileInfo($tmpfile)) {
+						$mtime = $info['mtime'];
+					}
+				}
+				$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
+				$query->execute(Array($uid,$name,$group,$mtime,'',''));
+				$ret = \OCP\DB::insertid('*PREFIX*ownnote');
+			}
+		} else {
+			$tmpfile = $FOLDER."/".$name.".htm";
+			if ($group != '')
+				$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
+			if (!\OC\Files\Filesystem::file_exists($tmpfile)) {
+				\OC\Files\Filesystem::touch($tmpfile);
+			}
+			$ret = 666;
 		}
 		return $ret;
 	}
 
 
-	public function deleteNote($FOLDER, $name, $group) {
-		$now = new DateTime();
-		$mtime = $now->getTimestamp();
-		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($mtime, $uid, $name, $group));
-		$query = \OCP\DB::prepare("SELECT id FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
-		foreach($results as $result) {
-			$query2 = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
-			$results2 = $query2->execute(Array($result['id']));
+	public function deleteNote($DB_OR_FOLDER, $FOLDER, $name, $group) {
+		if ($this->useDatabase($DB_OR_FOLDER, $FOLDER)) {
+			$now = new DateTime();
+			$mtime = $now->getTimestamp();
+			$uid = \OCP\User::getUser();
+			$query = \OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
+			$results = $query->execute(Array($mtime, $uid, $name, $group));
+			$query = \OCP\DB::prepare("SELECT id FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+			$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+			foreach($results as $result) {
+				$query2 = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
+				$results2 = $query2->execute(Array($result['id']));
+			}
 		}
-		if ($FOLDER != '') {
+		if ($this->useFolder($DB_OR_FOLDER, $FOLDER)) {
 			$tmpfile = $FOLDER."/".$name.".htm";
 			if ($group != '')
 				$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
@@ -354,35 +419,46 @@ class Backend {
 	}
 
 
-	public function editNote($name, $group) {
+	public function editNote($DB_OR_FOLDER, $FOLDER, $name, $group) {
 		$ret = "";
-		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id,note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
-		foreach($results as $result) {
-			$ret = $result['note'];
-			if ($ret == '') {
-				$query2 = \OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote_parts WHERE id=? order by pid");
-				$results2 = $query2->execute(Array($result['id']))->fetchAll();
-				foreach($results2 as $result2) {
-					$ret .= $result2['note'];
+		if ($this->useDatabase($DB_OR_FOLDER, $FOLDER)) {
+			$uid = \OCP\User::getUser();
+			$query = \OCP\DB::prepare("SELECT id,note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
+			$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+			foreach($results as $result) {
+				$ret = $result['note'];
+				if ($ret == '') {
+					$query2 = \OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote_parts WHERE id=? order by pid");
+					$results2 = $query2->execute(Array($result['id']))->fetchAll();
+					foreach($results2 as $result2) {
+						$ret .= $result2['note'];
+					}
 				}
 			}
+		} else {
+			// we only use file system, so we need to do a select of the note and load it
+			$tmpfile = $FOLDER."/".$name.".htm";
+			if ($group != '')
+				$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
+			if (\OC\Files\Filesystem::file_exists($tmpfile))
+				$ret = \OC\Files\Filesystem::file_get_contents($tmpfile);
 		}
 		return $ret;
 	}
 
-	public function saveNote($FOLDER, $name, $group, $content, $in_mtime) {
-		$maxlength = 2621440; // 5 Megs (2 bytes per character)
-		$now = new DateTime();
-		$mtime = $now->getTimestamp();
-		if ($in_mtime != 0)
-			$mtime = $in_mtime;
-		$uid = \OCP\User::getUser();
+	public function saveNote($DB_OR_FOLDER, $FOLDER, $name, $group, $content, $in_mtime) {
 		// First check to see if we're creating a new note, createNote handles all of this
-		$id = $this->createNote($FOLDER, $name, $group);
+		$id = $this->createNote($DB_OR_FOLDER, $FOLDER, $name, $group);
 		if ($id != -1) {
-			if ($FOLDER != '') {
+			$maxlength = 2621440; // 5 Megs (2 bytes per character)
+			$now = new DateTime();
+			$mtime = $now->getTimestamp();
+			if ($in_mtime != 0)
+				$mtime = $in_mtime;
+			$uid = \OCP\User::getUser();
+			
+			// do save in folder first, to get the updated $mtime
+			if ($this->useFolder($DB_OR_FOLDER, $FOLDER)) {
 				$tmpfile = $FOLDER."/".$name.".htm";
 				if ($group != '')
 					$tmpfile = $FOLDER."/[".$group."] ".$name.".htm";
@@ -391,49 +467,67 @@ class Backend {
 					$mtime = $info['mtime'];
 				}
 			}
-			$query = \OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($mtime, $uid, $name, $group));
-			$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
-			$results = $query->execute(Array($id));
-			$contentarr = $this->splitContent($content);
-			for ($i = 0; $i < count($contentarr); $i++) {
-				$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)");
-				$results = $query->execute(Array($id, $contentarr[$i]));
+			if ($this->useDatabase($DB_OR_FOLDER, $FOLDER)) {
+				$query = \OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?");
+				$results = $query->execute(Array($mtime, $uid, $name, $group));
+				$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
+				$results = $query->execute(Array($id));
+				$contentarr = $this->splitContent($content);
+				for ($i = 0; $i < count($contentarr); $i++) {
+					$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)");
+					$results = $query->execute(Array($id, $contentarr[$i]));
+				}
 			}
-
 		}
 		return "DONE";
 	}
 
-	public function renameNote($FOLDER, $name, $group, $in_newname, $in_newgroup) {
+	public function renameNote($DB_OR_FOLDER, $FOLDER, $name, $group, $in_newname, $in_newgroup) {
 		$newname = str_replace("\\", "-", str_replace("/", "-", $in_newname));
 		$newgroup = str_replace("\\", "-", str_replace("/", "-", $in_newgroup));
 		// We actually need to delete and create so that the delete flag exists for syncing clients
-		$content = $this->editNote($name, $group);
-		$this->deleteNote($FOLDER, $name, $group);
-		$this->createNote($FOLDER, $newname, $newgroup);
+		$content = $this->editNote($DB_OR_FOLDER, $FOLDER, $name, $group);
+		$this->deleteNote($DB_OR_FOLDER, $FOLDER, $name, $group);
+		$this->createNote($DB_OR_FOLDER, $FOLDER, $newname, $newgroup);
 		// BUG: Don't need createNote above?
-		$this->saveNote($FOLDER, $newname, $newgroup, $content, 0);
+		$this->saveNote($DB_OR_FOLDER, $FOLDER, $newname, $newgroup, $content, 0);
 		return "DONE";
 	}
 
-	public function deleteGroup($FOLDER, $group) {
-		// We actually need to just rename all the notes
-		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?");
-		$results = $query->execute(Array($uid, $group))->fetchAll();
-		foreach($results as $result) {
-			$this->renameNote($FOLDER, $result['name'], $group, $result['name'], '');
-		}
-		return "DONE";
+	public function deleteGroup($DB_OR_FOLDER, $FOLDER, $group) {
+		// delete just removes group name from db and/or file => same as renameGroup() to '' :-)
+		return $this->renameGroup($DB_OR_FOLDER, $FOLDER, $group, '');
 	}
 
-	public function renameGroup($FOLDER, $group, $newgroup) {
-		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?");
-		$results = $query->execute(Array($uid, $group))->fetchAll();
-		foreach($results as $result) {
-			$this->renameNote($FOLDER, $result['name'], $group, $result['name'], $newgroup);
+	public function renameGroup($DB_OR_FOLDER, $FOLDER, $group, $newgroup) {
+		if ($this->useDatabase($DB_OR_FOLDER, $FOLDER)) {
+			$uid = \OCP\User::getUser();
+			$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?");
+			$results = $query->execute(Array($uid, $group))->fetchAll();
+			foreach($results as $result) {
+				$this->renameNote($DB_OR_FOLDER, $FOLDER, $result['name'], $group, $result['name'], $newgroup);
+			}
+		} else {
+			// we only use file system, so we need to do a select of the group and go through all the filenames
+			if ($listing = \OC\Files\Filesystem::opendir($FOLDER)) {
+				if (!$listing) {
+					echo "ERROR: Error listing directory.";
+					exit;
+				}
+				while (($file = readdir($listing)) !== false) {
+					$tmpfile = $file;
+					if ($tmpfile == "." || $tmpfile == "..") continue;
+					if (!$this->endsWith($tmpfile, ".htm")) continue;
+					if ($info = \OC\Files\Filesystem::getFileInfo($FOLDER."/".$tmpfile)) {
+						// Separate the name and group name
+						list ($fgroup, $fname) = $this->getGroupAndNameForFile($tmpfile);
+						if ($fgroup == $group) {
+							// yep, do a rename of this note
+							$this->renameNote($DB_OR_FOLDER, $FOLDER, $fname, $group, $fname, $newgroup);
+						}
+					}
+				}
+			}
 		}
 		return "DONE";
 	}
