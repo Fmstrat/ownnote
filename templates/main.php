@@ -18,6 +18,7 @@ foreach ($ocVersionArray as $v) {
 }
 
 ?>
+<input type="hidden" name="nextNonce" id="nextNonce" value="<?php p(\OC::$server->getContentSecurityPolicyNonceManager()->getNonce()) ?>" />
 <div id="app">
 	<div id="app-navigation">
 		<ul id="grouplist">
