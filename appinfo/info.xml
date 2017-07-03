@@ -8,8 +8,8 @@
     <version>1.08</version>
     <requiremin>7.0.3</requiremin>
     <dependencies>
-        <lib>curl</lib>
-        <owncloud min-version="7.0.3" max-version="12.0" />
-        <nextcloud min-version="7.0.3" max-version="12.0" />
+      <lib>curl</lib>
+        <owncloud min-version="7.0.3" max-version="10" />
+        <nextcloud min-version="9.1" max-version="12" />
     </dependencies>
 </info>
