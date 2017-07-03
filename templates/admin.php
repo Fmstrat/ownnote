@@ -2,6 +2,7 @@
 
 \OCP\Util::addScript('ownnote', 'admin');
 
+$db_or_folder = $_['db_or_folder'];
 $folder = $_['folder'];
 $disableAnnouncement = $_['disableAnnouncement'];
 $l = OCP\Util::getL10N('ownnote');
@@ -12,8 +13,9 @@ $l = OCP\Util::getL10N('ownnote');
         <h2>ownNote</h2>
 	<label for="ownnote-type"><?php p($l->t("How would you like to store your notes?")); ?></label><br>
 	<select id="ownnote-type">
-		<option <?php if ($folder == "") echo "selected"; ?> value=""><?php p($l->t("Database only")); ?></option>
-		<option <?php if ($folder != "") echo "selected"; ?> value="folder"><?php p($l->t("Database and folder")); ?></option>
+		<option <?php if ($db_or_folder == 'db_only') echo "selected"; ?> value="db_only"><?php p($l->t("Database only")); ?></option>
+		<option <?php if ($db_or_folder == 'db_or_folder') echo "selected"; ?> value="db_and_folder"><?php p($l->t("Database and folder")); ?></option>
+		<option <?php if ($db_or_folder == 'folder_only') echo "selected"; ?> value="folder_only"><?php p($l->t("Folder only")); ?></option>
 	</select><br>
 	<br>
 	<div id="ownnote-folder-settings" style="display: <?php if ($folder != "") echo "block"; else echo "none"; ?>">

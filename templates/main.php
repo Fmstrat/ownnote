@@ -1,7 +1,9 @@
 <?php
 \OCP\Util::addScript('ownnote', 'script');
+\OCP\Util::addScript('ownnote', 'prism');
 \OCP\Util::addScript('ownnote','tinymce/tinymce.min');
 \OCP\Util::addStyle('ownnote', 'style');
+\OCP\Util::addStyle('ownnote', 'prism');
 
 $disableAnnouncement = \OCP\Config::getAppValue('ownnote', 'disableAnnouncement', '');
 $l = OCP\Util::getL10N('ownnote');
