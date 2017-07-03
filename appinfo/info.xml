@@ -9,6 +9,6 @@
     <requiremin>7.0.3</requiremin>
     <dependencies>
         <lib>curl</lib>
-        <owncloud min-version="7.0.3" max-version="9.1" />
+        <owncloud min-version="7.0.3" max-version="9.2" />
     </dependencies>
 </info>
