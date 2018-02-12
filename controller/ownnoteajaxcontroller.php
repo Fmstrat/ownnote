@@ -40,7 +40,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxindex() {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		return $this->backend->getListing($FOLDER, false);
 	}
 
@@ -55,7 +55,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxcreate($name, $group) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
 			return $this->backend->createNote($FOLDER, $name, $group);
 	}
@@ -64,7 +64,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxdel($name, $group) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group))
 			return $this->backend->deleteNote($FOLDER, $name, $group);
 	}
@@ -81,7 +81,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxsave($name, $group, $content) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($group) && isset($content))
 			return $this->backend->saveNote($FOLDER, $name, $group, $content, 0);
 	}
@@ -90,7 +90,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxren($name, $group, $newname, $newgroup) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		if (isset($name) && isset($newname) && isset($group) && isset($newgroup))
 			return $this->backend->renameNote($FOLDER, $name, $group, $newname, $newgroup);
 	}
@@ -99,7 +99,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxdelgroup($group) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		if (isset($group))
 			return $this->backend->deleteGroup($FOLDER, $group);
 	}
@@ -108,7 +108,7 @@ class OwnnoteAjaxController extends ApiController {
 	* @NoAdminRequired
 	*/
 	public function ajaxrengroup($group, $newgroup) {
-		$FOLDER = \OCP\Config::getAppValue('ownnote', 'folder', '');
+		$FOLDER = \OC::$server->getConfig()->getAppValue('ownnote', 'folder', '');
 		if (isset($group) && isset($newgroup))
 			return $this->backend->renameGroup($FOLDER, $group, $newgroup);
 	}

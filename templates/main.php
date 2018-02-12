@@ -3,7 +3,7 @@
 \OCP\Util::addScript('ownnote','tinymce/tinymce.min');
 \OCP\Util::addStyle('ownnote', 'style');
 
-$disableAnnouncement = \OCP\Config::getAppValue('ownnote', 'disableAnnouncement', '');
+$disableAnnouncement = true;
 $l = OCP\Util::getL10N('ownnote');
 
 $ocVersionArray = OCP\Util::getVersion();
@@ -27,7 +27,6 @@ foreach ($ocVersionArray as $v) {
 	<div id="app-content">
 		<div id="ownnote"></div>
 	</div>
-	<input type=hidden name="disableAnnouncement" id="disableAnnouncement" value="<?php echo $disableAnnouncement; ?>">
 	<div id="ownnote-l10n">
 		l10n["# day ago"] = "<?php p($l->t("# day ago")); ?>";
 		l10n["# days ago"] = "<?php p($l->t("# days ago")); ?>";
