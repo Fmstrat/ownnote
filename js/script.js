@@ -443,7 +443,7 @@
 			html += '<li class="group' + a + '" data-type="all">';
 			html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+htmlQuotes(trans(name))+'</a>';
 		} else {
-			html += '<li id="group-'+n+'-edit" class="group editing">';
+			html += '<li id="group-'+n+'-edit" class="group editing" style="display:none">';
 			html += '	<ul class="oc-addnew open" style="display: inline-block; width: auto; height: auto;" aria-disabled="false">';
 			html += '		<li>';
 			html += '			<input id="edit-'+n+'-text" class="oc-addnew-name" type="text" value="'+n+'" style="display: inline;">';
@@ -454,7 +454,7 @@
 			html += '<li id="group-'+n+'" class="group' + a + '" data-type="category">';
 			html += '	<a class="name" id="link-'+n+'" role="button" title="'+n+'">'+n+'</a>';
 		}
-		html += '	<span class="utils">';
+		html += '	<span class="utils" style="z-index: 200">';
 		html += '		<a class="icon-rename action edit tooltipped rightwards" group="'+n+'" original-title=""></a>';
 		html += '		<a class="icon-delete action delete tooltipped rightwards" group="'+n+'" original-title=""></a>';
 		html += '		<span class="action numnotes">'+count+'</span>';
