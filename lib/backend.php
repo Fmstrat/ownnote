@@ -10,6 +10,12 @@ use DOMDocument;
 
 class Backend {
 
+	private $db;
+
+	public function __construct() {
+		$this->db = \OC::$server->getDatabaseConnection();
+	}
+
 	public function startsWith($haystack, $needle) {
 		return $needle === "" || strripos($haystack, $needle, -strlen($haystack)) !== FALSE;
 	}
@@ -131,8 +137,8 @@ class Backend {
 		// Get the listing from the database
 		$requery = false;
 		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
-		$results = $query->execute(Array($uid))->fetchAll();
+		$query = "SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name";
+		$results = $this->db->executeQuery($query, Array($uid))->fetchAll();
 		$results2 = $results;
 		if ($results)
 			foreach($results as $result)
@@ -153,14 +159,14 @@ class Backend {
 							$delid = $result['id'];
 						}
 						if ($delid != -1) {
-							$delquery = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE id=?");
-							$delquery->execute(Array($delid));
+							$delquery = "DELETE FROM *PREFIX*ownnote WHERE id=?";
+							$this->db->executeQuery($delquery, Array($delid));
 							$requery = true;
 						}
 					}
 		if ($requery) {
-			$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
-			$results = $query->execute(Array($uid))->fetchAll();
+			$query = "SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name";
+			$results = $this->db->executeQuery($query, Array($uid))->fetchAll();
 			$requery = false;
 		}
 		// Tests to add a bunch of notes
@@ -242,8 +248,8 @@ class Backend {
 				}
 			}
 			if ($requery) {
-				$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name");
-				$results = $query->execute(Array($uid))->fetchAll();
+				$query = "SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? ORDER BY name";
+				$results = $this->db->executeQuery($query, Array($uid))->fetchAll();
 			}
 			// Now also make sure the files exist, they may not if the user switched folders in admin.
 			if ($results)
@@ -298,8 +304,8 @@ class Backend {
 		$fileindb = false;
 		$filedeldb = false;
 		$ret = -1;
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+		$query = "SELECT id, name, grouping, mtime, deleted FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?";
+		$results = $this->db->executeQuery($query, Array($uid, $name, $group))->fetchAll();
 		foreach($results as $result)
 			if ($result['deleted'] == 0) {
 				$fileindb = true;
@@ -308,8 +314,8 @@ class Backend {
 				$filedeldb = true;
 			}
 		if ($filedeldb) {
-			$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($uid, $name, $group));
+			$query = "DELETE FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?";
+			$results = $this->db->executeQuery($query, Array($uid, $name, $group));
 		}
 		if (! $fileindb) {
 			if ($FOLDER != '') {
@@ -323,9 +329,9 @@ class Backend {
 					$mtime = $info['mtime'];
 				}
 			}
-			$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)");
-			$query->execute(Array($uid,$name,$group,$mtime,'',''));
-			$ret = \OCP\DB::insertid('*PREFIX*ownnote');
+			$query = "INSERT INTO *PREFIX*ownnote (uid, name, grouping, mtime, note, shared) VALUES (?,?,?,?,?,?)";
+			$this->db->executeQuery($query, Array($uid,$name,$group,$mtime,'',''));
+			$ret = $this->db->lastInsertId('*PREFIX*ownnote');
 		}
 		return $ret;
 	}
@@ -335,13 +341,13 @@ class Backend {
 		$now = new DateTime();
 		$mtime = $now->getTimestamp();
 		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', deleted=1, mtime=? WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($mtime, $uid, $name, $group));
-		$query = \OCP\DB::prepare("SELECT id FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+		$query = "UPDATE *PREFIX*ownnote set note='', deleted=1, mtime=? WHERE uid=? and name=? and grouping=?";
+		$results = $this->db->executeQuery($query, Array($mtime, $uid, $name, $group));
+		$query = "SELECT id FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?";
+		$results = $this->db->executeQuery($query, Array($uid, $name, $group))->fetchAll();
 		foreach($results as $result) {
-			$query2 = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
-			$results2 = $query2->execute(Array($result['id']));
+			$query2 = "DELETE FROM *PREFIX*ownnote_parts WHERE id=?";
+			$results2 = $this->db->executeQuery($query2, Array($result['id']));
 		}
 		if ($FOLDER != '') {
 			$tmpfile = $FOLDER."/".$name.".htm";
@@ -357,13 +363,13 @@ class Backend {
 	public function editNote($name, $group) {
 		$ret = "";
 		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id,note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?");
-		$results = $query->execute(Array($uid, $name, $group))->fetchAll();
+		$query = "SELECT id,note FROM *PREFIX*ownnote WHERE uid=? and name=? and grouping=?";
+		$results = $this->db->executeQuery($query, Array($uid, $name, $group))->fetchAll();
 		foreach($results as $result) {
 			$ret = $result['note'];
 			if ($ret == '') {
-				$query2 = \OCP\DB::prepare("SELECT note FROM *PREFIX*ownnote_parts WHERE id=? order by pid");
-				$results2 = $query2->execute(Array($result['id']))->fetchAll();
+				$query2 = "SELECT note FROM *PREFIX*ownnote_parts WHERE id=? order by pid";
+				$results2 = $this->db->executeQuery($query2, Array($result['id']))->fetchAll();
 				foreach($results2 as $result2) {
 					$ret .= $result2['note'];
 				}
@@ -391,14 +397,14 @@ class Backend {
 					$mtime = $info['mtime'];
 				}
 			}
-			$query = \OCP\DB::prepare("UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?");
-			$results = $query->execute(Array($mtime, $uid, $name, $group));
-			$query = \OCP\DB::prepare("DELETE FROM *PREFIX*ownnote_parts WHERE id=?");
-			$results = $query->execute(Array($id));
+			$query = "UPDATE *PREFIX*ownnote set note='', mtime=? WHERE uid=? and name=? and grouping=?";
+			$results = $this->db->executeQuery($query, Array($mtime, $uid, $name, $group));
+			$query = "DELETE FROM *PREFIX*ownnote_parts WHERE id=?";
+			$results = $this->db->executeQuery($query, Array($id));
 			$contentarr = $this->splitContent($content);
 			for ($i = 0; $i < count($contentarr); $i++) {
-				$query = \OCP\DB::prepare("INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)");
-				$results = $query->execute(Array($id, $contentarr[$i]));
+				$query = "INSERT INTO *PREFIX*ownnote_parts (id, note) values (?,?)";
+				$results = $this->db->executeQuery($query, Array($id, $contentarr[$i]));
 			}
 
 		}
@@ -420,8 +426,8 @@ class Backend {
 	public function deleteGroup($FOLDER, $group) {
 		// We actually need to just rename all the notes
 		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?");
-		$results = $query->execute(Array($uid, $group))->fetchAll();
+		$query = "SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?";
+		$results = $this->db->executeQuery($query, Array($uid, $group))->fetchAll();
 		foreach($results as $result) {
 			$this->renameNote($FOLDER, $result['name'], $group, $result['name'], '');
 		}
@@ -430,8 +436,8 @@ class Backend {
 
 	public function renameGroup($FOLDER, $group, $newgroup) {
 		$uid = \OCP\User::getUser();
-		$query = \OCP\DB::prepare("SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?");
-		$results = $query->execute(Array($uid, $group))->fetchAll();
+		$query = "SELECT id, name, grouping, mtime FROM *PREFIX*ownnote WHERE deleted=0 and uid=? and grouping=?";
+		$results = $this->db->executeQuery($query, Array($uid, $group))->fetchAll();
 		foreach($results as $result) {
 			$this->renameNote($FOLDER, $result['name'], $group, $result['name'], $newgroup);
 		}

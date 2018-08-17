@@ -1,3 +1,6 @@
+#app, #ownnote, #controls, #createform {
+	width: 100%;
+}
 
 .listing {
 	height: 40pt;
@@ -72,6 +75,10 @@
 	float: left;
 	color: #A0A0A0;
 	width: 60%;
+}
+
+.button {
+	display: inline-block;
 }
 
 .buttons {

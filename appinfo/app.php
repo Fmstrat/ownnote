@@ -11,6 +11,8 @@
 
 namespace OCA\OwnNote\AppInfo;
 
+use \OCP\IURLGenerator;
+
 \OCP\App::registerAdmin('ownnote', 'admin');
 
 \OC::$server->getNavigationManager()->add(array(
@@ -22,14 +24,13 @@ namespace OCA\OwnNote\AppInfo;
     'order' => 10,
 
     // the route that will be shown on startup
-    'href' => \OCP\Util::linkToRoute('ownnote.page.index'),
+    'href' => \OC::$server->getURLGenerator()->linkToRoute('ownnote.page.index'),
 
     // the icon that will be shown in the navigation
     // this file needs to exist in img/
-    'icon' => \OCP\Util::imagePath('ownnote', 'app.svg'),
+    'icon' => \OC::$server->getURLGenerator()->imagePath('ownnote', 'app.svg'),
 
     // the title of your application. This will be used in the
     // navigation or on the settings page of your app
-    //'name' => \OC_L10N::get('ownnote')->t('Own Note')
     'name' => \OCP\Util::getL10N('ownnote')->t('Notes')
 ));
