@@ -185,7 +185,8 @@ class Backend {
 			}
 			// Synchronize files to the database
 			$filearr = array();
-			if ($listing = \OC\Files\Storage\Local::opendir($FOLDER)) {
+			$folderview = new \OC\Files\Storage\Local(array("datadir" => $FOLDER));
+			if ($listing = $folderview->opendir('.')) {
 				if (!$listing) {
 					echo "ERROR: Error listing directory.";
 					exit;
