@@ -35,8 +35,37 @@
 
 	var l10n = new Array();
 	function translate() {
-		var t = $('#ownnote-l10n').html();
-		eval(t);
+		l10n["# day ago"] = document.getElementById("l10n # day ago").value;
+		l10n["# days ago"] = document.getElementById("l10n # days ago").value;
+		l10n["# hour ago"] = document.getElementById("l10n # hour ago").value;
+		l10n["# hours ago"] = document.getElementById("l10n # hours ago").value;
+		l10n["# minute ago"] = document.getElementById("l10n # minute ago").value;
+		l10n["# minutes ago"] = document.getElementById("l10n # minutes ago").value;
+		l10n["# month ago"] = document.getElementById("l10n # month ago").value;
+		l10n["# months ago"] = document.getElementById("l10n # months ago").value;
+		l10n["# second ago"] = document.getElementById("l10n # second ago").value;
+		l10n["# seconds ago"] = document.getElementById("l10n # seconds ago").value;
+		l10n["# week ago"] = document.getElementById("l10n # week ago").value;
+		l10n["# weeks ago"] = document.getElementById("l10n # weeks ago").value;
+		l10n["# year ago"] = document.getElementById("l10n # year ago").value;
+		l10n["# years ago"] = document.getElementById("l10n # years ago").value;
+		l10n["All"] = document.getElementById("l10n All").value;
+		l10n["An ungrouped file has the same name as a file in this group."] = document.getElementById("l10n An ungrouped file has the same name as a file in this group").value;
+		l10n["Cancel"] = document.getElementById("l10n Cancel").value;
+		l10n["Create"] = document.getElementById("l10n Create").value;
+		l10n["Dismiss"] = document.getElementById("l10n Dismiss").value;
+		l10n["Filename/group already exists."] = document.getElementById("l10n Filename/group already exists").value;
+		l10n["Group"] = document.getElementById("l10n Group").value;
+		l10n["Group already exists."] = document.getElementById("l10n Group already exists").value;
+		l10n["Just now"] = document.getElementById("l10n Just now").value;
+		l10n["Modified"] = document.getElementById("l10n Modified").value;
+		l10n["Name"] = document.getElementById("l10n Name").value;
+		l10n["New"] = document.getElementById("l10n New").value;
+		l10n["Not grouped"] = document.getElementById("l10n Not grouped").value;
+		l10n["Note"] = document.getElementById("l10n Note").value;
+		l10n["Notes"] = document.getElementById("l10n Notes").value;
+		l10n["Quick Save"] = document.getElementById("l10n Quick Save").value;
+		l10n["Save"] = document.getElementById("l10n Save").value;
 	}
 
 	function trans(s) {
