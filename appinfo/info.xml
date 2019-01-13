@@ -9,7 +9,7 @@
     <requiremin>7.0.3</requiremin>
     <dependencies>
         <lib>curl</lib>
-        <owncloud min-version="7.0.3" max-version="9.2" />
+        <owncloud min-version="7.0.3" max-version="10.0.10" />
         <nextcloud min-version="9.1" max-version="16" />
     </dependencies>
 </info>
