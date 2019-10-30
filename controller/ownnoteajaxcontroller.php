@@ -18,10 +18,6 @@ use \OCP\AppFramework\Http;
 use \OCP\IRequest;
 use \OCA\OwnNote\Lib\Backend;
 
-\OCP\App::checkAppEnabled('ownnote');
-
-
-
 class OwnnoteAjaxController extends ApiController {
 
 	private $backend;

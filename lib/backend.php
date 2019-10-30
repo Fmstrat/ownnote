@@ -3,7 +3,6 @@
 namespace OCA\OwnNote\Lib;
 
 \OCP\User::checkLoggedIn();
-\OCP\App::checkAppEnabled('ownnote');
 
 use DateTime;
 use DOMDocument;
